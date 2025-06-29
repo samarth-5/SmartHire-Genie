@@ -43,9 +43,10 @@
    };
    
    type StepData = {
-     icon: React.ComponentType<any>;
-     label: string;
-   };
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+  };
+  
    
    /* ------------------------------------------------------------------
       Root Component

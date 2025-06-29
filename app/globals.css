@@ -1,6 +1,17 @@
 @import "tailwindcss";
 
+/* globals.css */
 :root {
+  --font-sans: var(--font-inter);      /* default body */
+  --font-heading: var(--font-sora);    /* titles, buttons */
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+body            { font-family: var(--font-sans), system-ui, sans-serif; }
+h1, h2, h3, h4  { font-family: var(--font-heading); }
+code, pre       { font-family: var(--font-mono); }
+
+/* :root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -23,4 +34,4 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-}
+} */

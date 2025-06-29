@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, type ReactNode } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import {
   BadgeCheck,
@@ -19,11 +18,7 @@ import {
   X,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
-
-type ButtonProps = {
-  href: string;
-  children: ReactNode;
-};
+import Hero from '@/components/Hero';
    
    
 type FeatureCardProps = {
@@ -41,7 +36,7 @@ export default function HomePage() {
   return (
     <main className="min-h-screen w-full flex flex-col font-sans antialiased">
       <Navbar />
-      <HeroSection />
+      <Hero />
       <FeaturesSection />
       <WorkflowSection />
       <CallToAction />
@@ -49,75 +44,14 @@ export default function HomePage() {
   );
 }
    
-function Header() {
-  
-   }
-   
    
    
    /* ------------------------------------------------------------------
       Buttons
       ------------------------------------------------------------------ */
-   function FancyButton({ href, children }: ButtonProps) {
-     return (
-       <Link
-         href={href}
-         className="relative inline-flex items-center justify-center px-6 py-3 font-semibold text-white bg-teal-600 rounded-full shadow-md hover:-translate-y-1 hover:shadow-xl active:scale-95 transition duration-200"
-       >
-         {children}
-       </Link>
-     );
-   }
    
-   function GhostButton({ href, children }: ButtonProps) {
-     return (
-       <Link
-         href={href}
-         className="relative inline-flex items-center justify-center px-6 py-3 font-semibold text-black border border-black rounded-full hover:bg-teal-300 hover:-translate-y-1 active:scale-95 transition duration-200"
-       >
-         {children}
-       </Link>
-     );
-   }
    
-   /* ------------------------------------------------------------------
-      Hero Section
-      ------------------------------------------------------------------ */
-   function HeroSection() {
-     return (
-       <section className="pt-32 pb-20 px-4 bg-teal-100 text-teal-900 md:pt-40 md:pb-28">
-         <div className="max-w-7xl mx-auto grid gap-10 items-center md:grid-cols-2">
-           {/* Text */}
-           <div>
-             <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
-               Get Interview‑Ready with
-               <br className="hidden md:inline" />
-               <span className="text-teal-600"> AI‑Powered Practice & Feedback</span>
-             </h1>
-             <p className="max-w-xl text-lg mb-10">
-               Practice real technical interview questions, receive instant feedback, and boost your confidence — all in one place.
-             </p>
-             <div className="flex gap-4 flex-wrap">
-               <FancyButton href="/interview">Start an Interview</FancyButton>
-               <GhostButton href="#workflow">See How It Works</GhostButton>
-             </div>
-           </div>
-   
-           {/* Image */}
-           <div className="flex justify-center md:justify-end">
-             <Image
-               src="/robot.png"
-               alt="AI Interview Assistant"
-               width={520}
-               height={420}
-               className="h-[240px] md:h-[420px] w-auto object-contain"
-               priority
-             />
-           </div>
-         </div>
-       </section>
-     );
-   }
+  
    
    /* ------------------------------------------------------------------
       Features Section
@@ -126,7 +60,7 @@ function Header() {
      return (
        <section className="py-24 px-4 bg-teal-200 text-teal-900">
          <div className="max-w-6xl mx-auto text-center">
-           <h2 className="text-3xl md:text-4xl font-bold mb-6">Why SmartHire Genie?</h2>
+           <h2 className="text-3xl md:text-4xl font-bold mb-6">Why SmartHire Genie ?</h2>
            <p className="max-w-2xl mx-auto text-teal-800">
              Everything you need to conquer your next interview — packed into a single, lightning‑fast web app.
            </p>

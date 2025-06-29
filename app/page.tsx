@@ -1,11 +1,8 @@
 'use client';
 
-import React, { useState, type ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import Link from 'next/link';
 import {
-  BadgeCheck,
-  Sparkles,
-  FileText,
   Building,
   Briefcase,
   ListChecks,
@@ -14,8 +11,6 @@ import {
   TrendingUp,
   ArrowBigDownDash,
   ArrowRight,
-  Menu,
-  X,
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';

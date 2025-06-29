@@ -18,32 +18,43 @@ export default function Navbar() {
   const [loading, setLoading] = useState(false); // 🔒 guards duplicate pop‑ups
 
   useEffect(() => {
+    if (!auth) 
+      return;               // SSR or no Firebase → nothing to do
+  
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
-      if (currentUser) console.log('User logged in:', currentUser.displayName);
-    });
-    return unsubscribe;
-  }, []);
-
-  const handleLogin = async () => {
-    if (loading) return; // double‑click guard
-    setLoading(true);
-
-    try {
-      await signInWithGoogle(); // will throw if popup closed or cancelled
-    } catch (err: unknown) {
-      const code = (err as any)?.code as string | undefined;
-      if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-        // harmless – user dismissed popup or duplicate click
-        console.info('Sign‑in cancelled by user.');
-      } else {
-        console.error('Login failed!', err);
+      if (currentUser) {
+        console.log('User logged in:', currentUser.displayName);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+  
+    return unsubscribe;              // cleanup when component unmounts
+  }, []);
+  
 
+    type FirebaseAuthError = {
+      code?: string;
+      message?: string;
+    };
+    
+    const handleLogin = async () => {
+      if (loading) return;
+      setLoading(true);
+    
+      try {
+        await signInWithGoogle();
+      } catch (err: unknown) {
+        const code = (err as FirebaseAuthError)?.code;
+        if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+          console.info('Sign-in cancelled by user.');
+        } else {
+          console.error('Login failed!', err);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
   const handleLogout = async () => {
     try {
       await logOut();

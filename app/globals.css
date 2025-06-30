@@ -11,6 +11,15 @@ body            { font-family: var(--font-sans), system-ui, sans-serif; }
 h1, h2, h3, h4  { font-family: var(--font-heading); }
 code, pre       { font-family: var(--font-mono); }
 
+@keyframes marquee-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(0%); }
+}
+
+.animate-marquee {
+  animation: marquee-slide 20s linear infinite;
+}
+
 /* :root {
   --background: #ffffff;
   --foreground: #171717;

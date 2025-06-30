@@ -19,14 +19,14 @@ export default function Hero() {
           <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
             Get Interview‑Ready with
             <br className="hidden md:inline" />
-            <span className="text-teal-600">AI‑Powered Practice &amp; Feedback</span>
+            <span className="text-teal-600"> AI‑Powered Practice &amp; Feedback</span>
           </h1>
           <p className="max-w-xl text-lg mb-10">
             Practice real technical interview questions, receive instant feedback, and boost your confidence — all in one place.
           </p>
 
           <div className="flex gap-4 flex-wrap">
-            <FancyButton href="/interview">Start an Interview</FancyButton>
+            <FancyButton href="/dashboard">Begin your Journey</FancyButton>
             <GhostButton href="#workflow">See How It Works</GhostButton>
           </div>
         </div>
@@ -51,7 +51,7 @@ function FancyButton({ href, children }: ButtonProps) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!auth?.currentUser) {
       e.preventDefault();
-      toast.error('Log in to generate an interview!');
+      toast.error('Log in to begin your journey!');
       return;
     }
   };

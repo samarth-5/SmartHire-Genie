@@ -47,7 +47,6 @@ export default function RootLayout({
           toastOptions={{
             className: '',
             style: {
-              border: '1px solid #713200',
               padding: '10px',
               background: 'black',
               color: 'white'

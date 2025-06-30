@@ -9,7 +9,7 @@ export default function CallToAction() {
   const handleStartClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!auth?.currentUser) {
       e.preventDefault();
-      toast.error('Log in to generate an interview!');
+      toast.error('Log in to begin your journey!');
       return;
     }
   };
@@ -24,11 +24,11 @@ export default function CallToAction() {
           Jump in and start practicing — it’s free.
         </p>
         <Link
-          href="/interview"
+          href="/dashboard"
           onClick={handleStartClick}
           className="inline-block mt-8 bg-white text-teal-700 font-medium px-8 py-3 rounded-full shadow-md hover:bg-teal-100 hover:scale-105 transition"
         >
-          Start&nbsp;Now
+          Go to Dashboard
         </Link>
       </div>
 

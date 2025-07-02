@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Features from '@/components/Features';
 import Companies from '@/components/Companies';
@@ -11,7 +10,6 @@ import CallToAction from '@/components/CallToAction';
 export default function HomePage() {
   return (
     <main className="min-h-screen w-full flex flex-col font-sans antialiased">
-      <Navbar />
       <Hero />
       <Features />
       <WorkflowSection />

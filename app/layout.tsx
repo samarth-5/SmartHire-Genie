@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Sora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import Navbar from "@/components/Navbar";
 
 /* 1️⃣  Load variable fonts (single file each) */
 const inter = Inter({
@@ -42,6 +43,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${sora.variable} ${jetBrainsMono.variable}`}
       >
+        <Navbar />
         {children}
         <Toaster
           toastOptions={{

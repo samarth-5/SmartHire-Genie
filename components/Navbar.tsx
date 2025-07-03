@@ -123,7 +123,7 @@ export default function Navbar() {
           className="fixed inset-0 z-40 bg-teal-200/95 backdrop-blur-xl flex flex-col items-center justify-center gap-10 text-xl font-semibold text-black sm:hidden"
           onClick={() => setOpen(false)}
         >
-          <Link href="/resume" onClick={() => setOpen(false)} className="cursor-pointer underline">
+          <Link href="/resume" onClick={() => setOpen(false)} className="cursor-pointer underline-offset-2">
             Resume Review
           </Link>
           {user ? (
@@ -151,20 +151,5 @@ export default function Navbar() {
         </div>
       )}
     </>
-  );
-}
-
-function NavLink({ href, children, special = false }: NavLinkProps) {
-  return (
-    <Link
-      href={href}
-      className={
-        special
-          ? 'rounded-full border border-black px-4 py-2 hover:bg-teal-300/50 transition cursor-pointer'
-          : 'relative after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:bg-teal-800 after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform cursor-pointer'
-      }
-    >
-      {children}
-    </Link>
   );
 }

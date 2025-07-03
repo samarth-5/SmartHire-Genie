@@ -52,24 +52,26 @@ export default function ResumePage() {
 
   /* ---------- JSX ---------- */
   return (
-    <div className="relative min-h-screen bg-teal-100 p-40">
+    <div className="relative min-h-screen bg-teal-100 px-4 py-30 sm:px-10 lg:px-40">
       {/* Loading overlay */}
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-teal-300 bg-opacity-70 backdrop-blur-md z-50">
-          <span className="text-2xl font-semibold text-teal-900 animate-pulse">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-teal-300/70 backdrop-blur-md">
+          <span className="animate-pulse text-xl font-semibold text-teal-900 sm:text-2xl">
             Parsing resume…
           </span>
         </div>
       )}
 
       {/* Card */}
-      <div className="max-w-3xl mx-auto bg-teal-200 p-6 rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold text-teal-900 mb-6">Upload Your Resume</h1>
+      <div className="mx-auto w-full max-w-lg sm:max-w-2xl lg:max-w-3xl rounded-xl bg-teal-200 p-4 shadow-lg sm:p-6 lg:p-8">
+        <h1 className="mb-6 text-2xl font-bold text-teal-900 sm:text-3xl">
+          Upload Your Resume
+        </h1>
 
         {/* ---------- Resume picker ---------- */}
-        <div className="mb-4 flex items-center gap-3">
-          {/* Status box now stretches full width */}
-          <span className="flex-1 px-3 py-2 bg-white border rounded text-teal-900 truncate">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+          {/* Status box ‑ full width on mobile, fixed on larger screens */}
+          <span className="flex-1 truncate rounded border bg-white px-3 py-2 text-teal-900">
             {file ? file.name : 'No file chosen'}
           </span>
 
@@ -85,19 +87,21 @@ export default function ResumePage() {
           {/* Button‑look label */}
           <label
             htmlFor="resume-upload"
-            className="shrink-0 cursor-pointer bg-teal-400 hover:bg-teal-500 text-white font-semibold py-2 px-4 rounded transition-colors"
+            className="shrink-0 cursor-pointer rounded bg-teal-400 px-4 py-2 font-semibold text-white transition-colors hover:bg-teal-500"
           >
             Browse&nbsp;File
           </label>
         </div>
 
         {/* ---------- Job description area ---------- */}
-        <h2 className="text-xl font-semibold text-teal-800 mb-2">Paste Job Description</h2>
+        <h2 className="mb-2 text-lg font-semibold text-teal-800 sm:text-xl">
+          Paste Job Description
+        </h2>
         <textarea
           rows={6}
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          className="w-full p-3 border rounded resize-none bg-white"
+          className="w-full resize-none rounded border bg-white p-3"
           placeholder="Enter the job description here..."
         />
 
@@ -105,15 +109,15 @@ export default function ResumePage() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="hover:cursor-pointer mt-4 bg-teal-400 text-white font-semibold py-2 px-4 rounded hover:bg-teal-500 disabled:opacity-50"
+          className="mt-4 rounded bg-teal-400 px-4 py-2 font-semibold text-white transition-colors hover:bg-teal-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Submit Resume
         </button>
 
         {/* ---------- Feedback ---------- */}
         {feedback && (
-          <div className="mt-8 bg-teal-300 p-4 rounded text-teal-900 whitespace-pre-wrap">
-            <h3 className="text-2xl font-bold mb-2">Feedback</h3>
+          <div className="mt-8 rounded bg-teal-300 p-4 text-teal-900 whitespace-pre-wrap">
+            <h3 className="mb-2 text-xl font-bold sm:text-2xl">Feedback</h3>
             {feedback}
           </div>
         )}

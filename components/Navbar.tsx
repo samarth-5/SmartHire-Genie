@@ -2,17 +2,11 @@
 
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { signInWithGoogle, logOut } from '../firebase/auth';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/firebase/config';
 import toast from 'react-hot-toast';
-
-type NavLinkProps = {
-  href: string;
-  children: ReactNode;
-  special?: boolean;
-};
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);

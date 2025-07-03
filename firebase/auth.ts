@@ -1,19 +1,16 @@
 // firebase/auth.ts
 import {
-  getAuth,
   GoogleAuthProvider,
   signInWithPopup,
   signOut,
-  type Auth,
 } from "firebase/auth";
-import { app } from "./config";
+import { auth } from "./config";
 import toast from "react-hot-toast";
 
 /* ------------------------------------------------------------------
    SAFELY expose `auth`
    – On the server  ➜ it’s just  undefined (no window access → no crash)
    – In the browser ➜ it’s the real Auth instance                 */
-export const auth: Auth | undefined = app ? getAuth(app) : undefined;
 
 // Provider can be created even on the server (doesn’t touch window)
 const provider = new GoogleAuthProvider();

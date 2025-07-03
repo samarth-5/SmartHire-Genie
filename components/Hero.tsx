@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'react-hot-toast';
-import { auth } from '../firebase/auth';
+import { auth } from '../firebase/config';
 
 type ButtonProps = {
   href: string;

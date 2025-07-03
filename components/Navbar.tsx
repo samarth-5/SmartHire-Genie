@@ -3,8 +3,9 @@
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import React, { ReactNode, useEffect, useState } from 'react';
-import { signInWithGoogle, logOut, auth } from '../firebase/auth';
+import { signInWithGoogle, logOut } from '../firebase/auth';
 import { onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/firebase/config';
 
 type NavLinkProps = {
   href: string;

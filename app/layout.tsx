@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono, Sora } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/firebase/AuthContext";
 
 /* 1️⃣  Load variable fonts (single file each) */
 const inter = Inter({
@@ -43,6 +44,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${sora.variable} ${jetBrainsMono.variable}`}
       >
+        <AuthProvider>
         <Navbar />
         {children}
         <Toaster
@@ -55,6 +57,7 @@ export default function RootLayout({
            },
           }}
         />
+        </AuthProvider>
       </body>
     </html>
   );

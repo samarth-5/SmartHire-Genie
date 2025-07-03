@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import React from 'react';
 import { toast } from 'react-hot-toast';
-import { auth } from '../firebase/auth';
+import { auth } from '../firebase/config';
 
 export default function CallToAction() {
   const handleStartClick = (e: React.MouseEvent<HTMLAnchorElement>) => {

@@ -1,5 +1,6 @@
 'use client';
 
+import { AuthGuard } from '@/firebase/AuthGuard';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 
@@ -52,6 +53,7 @@ export default function ResumePage() {
 
   /* ---------- JSX ---------- */
   return (
+    <AuthGuard>
     <div className="relative min-h-screen bg-teal-100 px-4 py-30 sm:px-10 lg:px-40">
       {/* Loading overlay */}
       {loading && (
@@ -123,5 +125,6 @@ export default function ResumePage() {
         )}
       </div>
     </div>
+    </AuthGuard>
   );
 }

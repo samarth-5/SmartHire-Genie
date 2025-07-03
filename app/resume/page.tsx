@@ -45,6 +45,7 @@ export default function ResumePage() {
       const data = await res.json();
       setFeedback(data.feedback);
     } catch {
+      toast.error('Error processing resume! Please try again!');
       setFeedback('Error processing resume. Please try again.');
     } finally {
       setLoading(false);

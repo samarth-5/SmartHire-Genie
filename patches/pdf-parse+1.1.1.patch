@@ -1,0 +1,53 @@
+diff --git a/node_modules/pdf-parse/index.js b/node_modules/pdf-parse/index.js
+index e9fc367..cf1857b 100644
+--- a/node_modules/pdf-parse/index.js
++++ b/node_modules/pdf-parse/index.js
+@@ -1,26 +1,26 @@
+-const Fs = require('fs');
+-const Pdf = require('./lib/pdf-parse.js');
++/**************************************************************************
++ * pdf-parse – patched index.js
++ * Original library: https://github.com/modesty/pdf-parse
++ *
++ * Changes:
++ *   • Removed the CLI test runner that read ./test/data/05-versions-space.pdf
++ *   • Exposed exactly the same public API (`module.exports = Pdf`)
++ **************************************************************************/
+ 
+-module.exports = Pdf;
+-
+-let isDebugMode = !module.parent; 
+-
+-//process.env.AUTO_KENT_DEBUG
++const fs  = require('fs');                 // Node core
++const Pdf = require('./lib/pdf-parse.js'); // main parser
+ 
++module.exports = Pdf;
+ 
+-//for testing purpose
+-if (isDebugMode) {
+-
+-    let PDF_FILE = './test/data/05-versions-space.pdf';
+-    let dataBuffer = Fs.readFileSync(PDF_FILE);
+-    Pdf(dataBuffer).then(function(data) {
+-        Fs.writeFileSync(`${PDF_FILE}.txt`, data.text, {
+-            encoding: 'utf8',
+-            flag: 'w'
+-        });
+-        debugger;
+-    }).catch(function(err) {
+-        debugger;
+-    });
++/* --------------------------------------------------------------------- */
++/*  NOTE: The original library executed a demo whenever `module.parent`
++ *        was falsy (e.g. when bundled by Turbopack). That demo attempted
++ *        to read a local test PDF and crashed with ENOENT.
++ *
++ *        We delete that entire section so the library no longer performs
++ *        side‑effects at import‑time.                                   */
++/* --------------------------------------------------------------------- */
+ 
+-}
++// --- original test runner removed ---
++// let isDebugMode = !module.parent;
++// if (isDebugMode) { ... }

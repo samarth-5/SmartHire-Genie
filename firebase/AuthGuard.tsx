@@ -16,8 +16,8 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     }
   }, [user, loading, router]);
 
-  // While we’re checking auth, avoid a flash of the protected page
-  if (loading || !user) return null;
+  if (loading || !user) 
+    return null;
 
   return <>{children}</>;
 }

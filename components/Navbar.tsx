@@ -6,6 +6,7 @@ import React, { ReactNode, useEffect, useState } from 'react';
 import { signInWithGoogle, logOut } from '../firebase/auth';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth } from '@/firebase/config';
+import toast from 'react-hot-toast';
 
 type NavLinkProps = {
   href: string;
@@ -16,11 +17,11 @@ type NavLinkProps = {
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false); // 🔒 guards duplicate pop‑ups
+  const [loading, setLoading] = useState(false); 
 
   useEffect(() => {
     if (!auth) 
-      return;               // SSR or no Firebase → nothing to do
+      return;               
   
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -29,7 +30,7 @@ export default function Navbar() {
       }
     });
   
-    return unsubscribe;              // cleanup when component unmounts
+    return unsubscribe;             
   }, []);
   
 
@@ -47,8 +48,10 @@ export default function Navbar() {
       } catch (err: unknown) {
         const code = (err as FirebaseAuthError)?.code;
         if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+          toast.error('Sign-in cancelled by user!');
           console.info('Sign-in cancelled by user.');
         } else {
+          toast.error('Login failed!');
           console.error('Login failed!', err);
         }
       } finally {
@@ -61,6 +64,14 @@ export default function Navbar() {
       await logOut();
     } catch (err) {
       console.error('Logout failed!', err);
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!auth?.currentUser) {
+      e.preventDefault();
+      toast.error('Log in to get your resume reviewed!');
+      return;
     }
   };
 
@@ -78,7 +89,7 @@ export default function Navbar() {
           </Link>
 
           <nav className="hidden sm:flex items-center gap-8 text-base md:text-lg font-medium">
-            <NavLink href="/resume">Resume Review</NavLink>
+            <Link onClick={handleClick} href="/resume">Resume Review</Link>
             {user ? (
               <button
                 onClick={handleLogout}
@@ -112,7 +123,7 @@ export default function Navbar() {
           className="fixed inset-0 z-40 bg-teal-200/95 backdrop-blur-xl flex flex-col items-center justify-center gap-10 text-xl font-semibold text-black sm:hidden"
           onClick={() => setOpen(false)}
         >
-          <Link href="/resume" onClick={() => setOpen(false)} className="cursor-pointer">
+          <Link href="/resume" onClick={() => setOpen(false)} className="cursor-pointer underline">
             Resume Review
           </Link>
           {user ? (

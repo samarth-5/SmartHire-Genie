@@ -51,11 +51,9 @@ export default function ResumePage() {
     }
   };
 
-  /* ---------- JSX ---------- */
   return (
     <AuthGuard>
     <div className="relative min-h-screen bg-teal-100 px-4 py-30 sm:px-10 lg:px-40">
-      {/* Loading overlay */}
       {loading && (
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-teal-300/70 backdrop-blur-md">
           <span className="animate-pulse text-xl font-semibold text-teal-900 sm:text-2xl">
@@ -70,14 +68,11 @@ export default function ResumePage() {
           Upload Your Resume
         </h1>
 
-        {/* ---------- Resume picker ---------- */}
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-          {/* Status box ‑ full width on mobile, fixed on larger screens */}
           <span className="flex-1 truncate rounded border bg-white px-3 py-2 text-teal-900">
             {file ? file.name : 'No file chosen'}
           </span>
 
-          {/* Hidden input */}
           <input
             id="resume-upload"
             type="file"
@@ -86,16 +81,14 @@ export default function ResumePage() {
             className="hidden"
           />
 
-          {/* Button‑look label */}
           <label
             htmlFor="resume-upload"
-            className="shrink-0 cursor-pointer rounded bg-teal-400 px-4 py-2 font-semibold text-white transition-colors hover:bg-teal-500"
+            className="shrink-0 cursor-pointer rounded bg-teal-400 px-4 py-2 font-semibold text-white transition-colors hover:bg-teal-500 w-fit"
           >
             Browse&nbsp;File
           </label>
         </div>
 
-        {/* ---------- Job description area ---------- */}
         <h2 className="mb-2 text-lg font-semibold text-teal-800 sm:text-xl">
           Paste Job Description
         </h2>
@@ -107,7 +100,6 @@ export default function ResumePage() {
           placeholder="Enter the job description here..."
         />
 
-        {/* ---------- Submit button ---------- */}
         <button
           onClick={handleSubmit}
           disabled={loading}
@@ -116,7 +108,6 @@ export default function ResumePage() {
           Submit Resume
         </button>
 
-        {/* ---------- Feedback ---------- */}
         {feedback && (
           <div className="mt-8 rounded bg-teal-300 p-4 text-teal-900 whitespace-pre-wrap">
             <h3 className="mb-2 text-xl font-bold sm:text-2xl">Feedback</h3>

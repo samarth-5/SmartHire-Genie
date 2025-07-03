@@ -1,3 +1,6 @@
+'use-client';
+
+import { AuthGuard } from '@/firebase/AuthGuard';
 import { Metadata } from 'next';
 import Link from 'next/link';
 
@@ -8,11 +11,11 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <>
+    <AuthGuard>
       <main className="min-h-screen bg-teal-100 text-teal-800 px-4 py-20 mt-10">
         <div className="mx-auto flex max-w-6xl flex-col gap-10">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-            {/* Resume Review */}
+            
             <section className="flex flex-col gap-5 rounded-2xl border border-teal-300 bg-teal-200/70 backdrop-blur p-8 shadow-lg">
               <header className="flex items-center gap-4">
                 <span className="text-4xl">✨</span>
@@ -29,7 +32,6 @@ export default function DashboardPage() {
               </Link>
             </section>
 
-            {/* Generate Practice Interviews */}
             <section className="flex flex-col gap-5 rounded-2xl border border-teal-300 bg-teal-200/70 backdrop-blur p-8 shadow-lg">
               <header className="flex items-center gap-4">
                 <span className="text-4xl">📝</span>
@@ -47,7 +49,6 @@ export default function DashboardPage() {
             </section>
           </div>
 
-          {/* Your Interviews */}
           <section className="flex flex-col gap-5 rounded-2xl border border-teal-300 bg-teal-200/70 backdrop-blur p-8 shadow-lg">
             <header className="flex items-center gap-4">
               <span className="text-4xl">📄</span>
@@ -78,6 +79,6 @@ export default function DashboardPage() {
           © 2025&nbsp;Developed&nbsp;by&nbsp;@Samarth.&nbsp;All&nbsp;rights&nbsp;reserved.
         </Link>
       </footer>
-    </>
+    </AuthGuard>
   );
 }

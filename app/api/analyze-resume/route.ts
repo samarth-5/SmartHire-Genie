@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 export const runtime = 'nodejs';            // ⇢ keep this route off the edge
+export const dynamic = 'force-dynamic';
 
 const MODEL = 'gemini-2.5-pro';
 const MAX_CHARS = 20_000;

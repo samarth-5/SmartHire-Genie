@@ -83,7 +83,7 @@ export default function ResumePage() {
       });
 
       if (!res.ok) {
-        toast.error('Network is not connected!');
+        toast.error('Network response is not OK!');
         throw new Error("Network response was not ok");
       }
 

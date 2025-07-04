@@ -87,10 +87,6 @@ export default function ResumePage() {
 
       const data = await res.json();
       console.log(data);
-      /**
-       * data.feedback might be already an object or a string containing JSON.
-       * Handle both scenarios robustly.
-       */
       let fb: FeedbackData | null = null;
 
       if (typeof data.feedback === "string") {

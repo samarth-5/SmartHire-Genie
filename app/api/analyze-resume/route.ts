@@ -9,7 +9,6 @@ const MAX_CHARS = 20_000;
 
 export async function POST(req: NextRequest) {
   try {
-    /* 1️⃣  Read multipart form */
     const formData = await req.formData();
     const file = formData.get('resume') as File | null;
     const jobDescription = (formData.get('jobDescription') as string | null)?.trim();
@@ -18,11 +17,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing resume or job description.' }, { status: 400 });
     }
 
-    /* 2️⃣  ⏬  **Dynamic import** so tests inside pdf‑parse never execute */
     const { default: pdfParse } = await import('pdf-parse');
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const { text: resumeText } = await pdfParse(buffer);
+
+    console.log(resumeText);
 
     /* 3️⃣  Gemini prompt */
     const safeResume = resumeText.slice(0, MAX_CHARS);
@@ -48,7 +48,6 @@ Do NOT wrap in markdown.
 
     const userPrompt = `Resume:\n${safeResume}\n\nJob Description:\n${safeJD}`;
 
-    /* 4️⃣  Gemini call */
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
     const model = genAI.getGenerativeModel({ model: MODEL });
     const { response } = await model.generateContent({

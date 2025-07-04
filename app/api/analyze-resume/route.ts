@@ -12,7 +12,8 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData();
     const file = formData.get('resume') as File | null;
     const jobDescription = (formData.get('jobDescription') as string | null)?.trim();
-
+    console.log(jobDescription);
+    console.log(file);
     if (!file || !jobDescription) {
       return NextResponse.json({ error: 'Missing resume or job description.' }, { status: 400 });
     }

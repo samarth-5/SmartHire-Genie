@@ -76,12 +76,15 @@ export default function ResumePage() {
     formData.append("jobDescription", jobDescription);
 
     try {
+      console.log("abc");
+      console.log(formData);
       const res = await fetch("/api/analyze-resume", {
         method: "POST",
         body: formData,
       });
 
       if (!res.ok) {
+        toast.error('Network is not connected!');
         throw new Error("Network response was not ok");
       }
 

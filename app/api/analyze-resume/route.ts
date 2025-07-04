@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-export const runtime = 'nodejs';            // ⇢ keep this route off the edge
+export const runtime = 'nodejs';           
 export const dynamic = 'force-dynamic';
 
 const MODEL = 'gemini-2.5-pro';
@@ -20,8 +20,6 @@ export async function POST(req: NextRequest) {
     const { default: pdfParse } = await import('pdf-parse');
     const buffer = Buffer.from(await file.arrayBuffer());
     const { text: resumeText } = await pdfParse(buffer);
-
-    console.log(resumeText);
 
     const safeResume = resumeText.slice(0, MAX_CHARS);
     const safeJD     = jobDescription.slice(0, MAX_CHARS);

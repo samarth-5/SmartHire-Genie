@@ -70,7 +70,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* Centered footer with matching background */}
       <footer className="bg-teal-100 pb-3 text-center">
         <Link
           href="/about"

@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthGuard } from "@/firebase/AuthGuard";
+import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -75,8 +76,6 @@ export default function ResumePage() {
     formData.append("jobDescription", jobDescription);
 
     try {
-      console.log("abc");
-      console.log(formData);
       const res = await fetch("/api/analyze-resume", {
         method: "POST",
         body: formData,
@@ -88,7 +87,6 @@ export default function ResumePage() {
       }
 
       const data = await res.json();
-      //console.log(data);
       let fb: FeedbackData | null = null;
 
       if (typeof data.feedback === "string") {
@@ -111,7 +109,7 @@ export default function ResumePage() {
 
   return (
     <AuthGuard>
-      <div className="relative min-h-screen bg-teal-100 px-4 py-30 sm:px-10 lg:px-40">
+      <div className="relative min-h-screen bg-teal-100 px-4 pt-40 sm:px-10 lg:px-40">
         {/* Loading overlay */}
         {loading && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-teal-300/70 backdrop-blur-md">
@@ -149,7 +147,6 @@ export default function ResumePage() {
             </label>
           </div>
 
-          {/* Job description textarea */}
           <h2 className="mb-2 text-lg font-semibold text-teal-800 sm:text-xl">
             Paste Job Description
           </h2>
@@ -161,7 +158,6 @@ export default function ResumePage() {
             placeholder="Enter the job description here..."
           />
 
-          {/* Submit button */}
           <button
             onClick={handleSubmit}
             disabled={loading}
@@ -170,13 +166,11 @@ export default function ResumePage() {
             Submit Resume
           </button>
 
-          {/* Feedback block */}
           {feedback && (
             <div className="mt-8 rounded bg-teal-300 p-4 text-teal-900">
               <h3 className="mb-4 text-xl font-bold sm:text-2xl">Feedback</h3>
 
               <div className="space-y-6">
-                {/* ATS Score & Alignment */}
                 <div>
                   <h4 className="text-lg font-semibold">ATS Score</h4>
                   <p>{feedback.atsScore} / 100</p>
@@ -187,7 +181,6 @@ export default function ResumePage() {
                   <p>{feedback.alignmentPercentage}%</p>
                 </div>
 
-                {/* Strengths */}
                 <div>
                   <h4 className="text-lg font-semibold">✅ Strengths</h4>
                   <ul className="list-disc list-inside space-y-1">
@@ -197,7 +190,6 @@ export default function ResumePage() {
                   </ul>
                 </div>
 
-                {/* Weaknesses */}
                 <div>
                   <h4 className="text-lg font-semibold">⚠️ Weaknesses</h4>
                   <ul className="list-disc list-inside space-y-1">
@@ -207,7 +199,6 @@ export default function ResumePage() {
                   </ul>
                 </div>
 
-                {/* Key areas to improve */}
                 <div>
                   <h4 className="text-lg font-semibold">📌 Key Areas to Improve</h4>
                   <ul className="list-disc list-inside space-y-1">
@@ -217,7 +208,6 @@ export default function ResumePage() {
                   </ul>
                 </div>
 
-                {/* Recommendations */}
                 <div>
                   <h4 className="text-lg font-semibold">💡 Recommendations</h4>
                   <ul className="list-disc list-inside space-y-1">
@@ -231,6 +221,15 @@ export default function ResumePage() {
           )}
         </div>
       </div>
+
+      <footer className="bg-teal-100 pb-3 text-center">
+        <Link
+          href="/about"
+          className="text-sm font-bold text-black transition hover:text-black/80 hover:underline"
+        >
+          © 2025&nbsp;Developed&nbsp;by&nbsp;@Samarth.&nbsp;All&nbsp;rights&nbsp;reserved.
+        </Link>
+      </footer>
     </AuthGuard>
   );
 }

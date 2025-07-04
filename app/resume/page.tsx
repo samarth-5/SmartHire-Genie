@@ -67,7 +67,6 @@ export default function ResumePage() {
       return;
     }
 
-    /* ───────────────────────── API Call ───────────────────────── */
     setLoading(true);
     setFeedback(null);
 
@@ -89,7 +88,7 @@ export default function ResumePage() {
       }
 
       const data = await res.json();
-      console.log(data);
+      //console.log(data);
       let fb: FeedbackData | null = null;
 
       if (typeof data.feedback === "string") {
@@ -110,8 +109,6 @@ export default function ResumePage() {
     }
   };
 
-  /* ────────────────────────────────────────────────────────── */
-  /* 3️⃣  UI                                                    */
   return (
     <AuthGuard>
       <div className="relative min-h-screen bg-teal-100 px-4 py-30 sm:px-10 lg:px-40">

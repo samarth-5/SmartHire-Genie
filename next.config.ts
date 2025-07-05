@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['pdf-parse', 'pdfjs-dist'],
   },
+
+  images: {
+    domains: ['lh3.googleusercontent.com'],
+  },
 };
 
 export default nextConfig;

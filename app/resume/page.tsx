@@ -18,21 +18,13 @@ interface FeedbackData {
 }
 
 export default function ResumePage() {
-  /* ────────────────────────────────────────────────────────── */
-  /* 1️⃣  Local state                                           */
   const [file, setFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
 
-  /* ────────────────────────────────────────────────────────── */
-  /* 2️⃣  Constants & helpers                                   */
   const MAX_FILE_SIZE_MB = 1;
 
-  /**
-   * Sanitise a raw string that might be surrounded by markdown code fences
-   * and return parsed JSON.
-   */
   const parseFeedbackString = (raw: string): FeedbackData | null => {
     const cleaned = raw.trim().replace(/^```json\s*|```$/g, "");
     try {
@@ -58,7 +50,6 @@ export default function ResumePage() {
   };
 
   const handleSubmit = async () => {
-    /* ───────────────────────── Validation ───────────────────────── */
     if (!file) {
       toast.error("No Resume uploaded!");
       return;
@@ -109,7 +100,7 @@ export default function ResumePage() {
 
   return (
     <AuthGuard>
-      <div className="relative min-h-screen bg-teal-100 px-4 pt-40 sm:px-10 lg:px-40">
+      <div className="relative min-h-screen bg-teal-100 px-4 pt-30 sm:px-10 lg:px-40">
         {/* Loading overlay */}
         {loading && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-teal-300/70 backdrop-blur-md">

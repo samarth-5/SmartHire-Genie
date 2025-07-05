@@ -34,7 +34,7 @@ export default function DashboardPage() {
 
             <section className="flex flex-col gap-5 rounded-2xl border border-teal-300 bg-teal-200/70 backdrop-blur p-8 shadow-lg">
               <header className="flex items-center gap-4">
-                <span className="text-4xl">📝</span>
+                <span className="text-4xl">🤖</span>
                 <h2 className="text-3xl font-extrabold text-teal-900">Generate Practice Interviews</h2>
               </header>
               <p className="text-base leading-relaxed text-teal-700">

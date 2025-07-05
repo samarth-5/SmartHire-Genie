@@ -1,22 +1,16 @@
-// next.config.ts
 import type { NextConfig } from 'next';
 
-/**
- * Tell Next.js “don’t bundle pdf‑parse or its pdfjs peer;
- * load them with native `require()` at runtime”.
- */
 const nextConfig: NextConfig = {
-  // Next 15+ (stable)
+  // v15‑plus – opt specific Node‑only deps out of RSC bundling
   serverExternalPackages: ['pdf-parse', 'pdfjs-dist'],
-
-  // Next 14 only – keep until you fully migrate off 14.x
-  experimental: {
-    serverComponentsExternalPackages: ['pdf-parse', 'pdfjs-dist'],
-  },
 
   images: {
     domains: ['lh3.googleusercontent.com'],
   },
+
+  // Optional: let the build continue even if eslint finds warnings,
+  // remove if you prefer the default “fail on error” behaviour.
+  // eslint: { ignoreDuringBuilds: true },
 };
 
 export default nextConfig;

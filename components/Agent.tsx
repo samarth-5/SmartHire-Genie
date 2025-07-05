@@ -27,6 +27,7 @@ export default function Agent() {
 
   // Decide which image source to use.
   const photoSrc = user?.photoURL || defaultSvgDataUri;
+  console.log(setIsSpeaking);
 
   return (
     <section className="flex flex-col items-center justify-center gap-18 bg-teal-100 py-14 sm:flex-row">

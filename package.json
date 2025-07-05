@@ -10,13 +10,16 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "clsx": "^2.1.1",
     "firebase": "^11.9.1",
     "lucide-react": "^0.525.0",
     "next": "15.3.4",
     "pdf-parse": "^1.1.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-hot-toast": "^2.5.2"
+    "react-hot-toast": "^2.5.2",
+    "tailwind-merge": "^3.3.1",
+    "zod": "^3.25.74"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

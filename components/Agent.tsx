@@ -1,14 +1,27 @@
 "use client";
 
 import useCurrentUser from "@/firebase/currentUser";
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import React, { useMemo, useState } from "react";
 
+enum CallStatus {
+  INACTIVE = "INACTIVE",
+  CONNECTING = "CONNECTING",
+  ACTIVE = "ACTIVE",
+  FINISHED = "FINISHED",
+}
+
 export default function Agent() {
+  
   const user = useCurrentUser();
   const [isSpeaking, setIsSpeaking] = useState(true);
+  const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.FINISHED);
 
-  // ── fallback SVG ───────────────────────────────────────────────
+  console.log(setIsSpeaking);
+  console.log(setCallStatus);
+
+
   const defaultSvgDataUri = useMemo(() => {
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none">
@@ -25,6 +38,7 @@ export default function Agent() {
   const photoSrc = user?.photoURL || defaultSvgDataUri;
 
   return (
+    <>
     <section className="flex flex-col items-center justify-center gap-8 bg-teal-100 py-10 px-4 sm:flex-row sm:gap-18 sm:px-5">
       {/* ── AI Interviewer ───────────────────────────── */}
       <article
@@ -68,6 +82,46 @@ export default function Agent() {
           {user?.displayName ?? "Anonymous"}
         </h3>
       </article>
+
+      
     </section>
+
+<div className="w-full flex justify-center">
+{callStatus !== "ACTIVE" ? (
+  <button
+  type="button"
+  aria-label={callStatus === "INACTIVE" || callStatus === "FINISHED" ? "Start Call" : "Connecting"}
+  className={cn(
+    "relative btn-call px-4 py-2 rounded-full bg-teal-400 outline-1 outline-teal-600 text-white font-semibold",
+    "flex items-center justify-center gap-2",
+    "hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500",
+    "active:scale-[.97] transition disabled:opacity-60 disabled:pointer-events-none"
+  )}
+  disabled={callStatus === "CONNECTING"}  
+>
+  <span
+    className={cn(
+      "absolute inset-0 flex items-center justify-center",
+      callStatus === "CONNECTING" ? "animate-ping" : "hidden"
+    )}
+  >
+    <span className="block h-full w-full rounded-full bg-teal-500 opacity-75" />
+  </span>
+
+  <span className="relative z-[1]">
+    {callStatus === "INACTIVE" || callStatus === "FINISHED" ? "Start Call" : ". . ."}
+  </span>
+</button>
+
+) : (
+  <button type="button" aria-label="End Call" className="btn-disconnect px-4 py-2 rounded-full bg-red-500 text-white font-semibold flex items-center gap-2
+             hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500
+             active:scale-[.97] transition disabled:opacity-60 disabled:pointer-events-none">
+    End Call
+  </button>
+
+)}
+</div>
+</>
   );
 }

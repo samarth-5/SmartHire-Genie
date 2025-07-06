@@ -10,8 +10,7 @@
    export type InterviewCardProps = {
      company: string;
      role: string;
-     /** e.g. “Technical”, “Behavioural” */
-     type: string;
+     type: string; // e.g., "Technical"
      techstack: string[];
      coverImage?: {
        src: string;
@@ -44,27 +43,33 @@
            "hover:-translate-y-1 hover:shadow-xl"
          )}
        >
-         <div className="rounded-[1.4rem] bg-teal-100/70 p-6 backdrop-blur-sm">
+         <div className="rounded-[1.4rem] bg-teal-100/70 p-6 backdrop-blur-sm relative">
+           {/* Type Badge */}
            <span className="absolute top-3 right-3 z-10 rounded-full bg-teal-700/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
              {type}
            </span>
    
-           <div className="relative mb-4 h-28 w-full overflow-hidden rounded-lg bg-teal-50">
-             <Image
-               src={coverImage?.src || "/placeholder.png"}
-               alt={`${company} logo`}
-               fill
-               className="object-contain"
-               sizes="(max-width:768px) 100vw, 33vw"
-               priority={false}
-             />
+           {/* Top layout: Logo + Info */}
+           <div className="flex items-start gap-4 mb-4">
+             <div className="relative h-20 w-20 min-w-[5rem] rounded-lg overflow-hidden bg-teal-50">
+               <Image
+                 src={coverImage?.src || "/placeholder.png"}
+                 alt={`${company} logo`}
+                 fill
+                 className="object-contain"
+                 sizes="80px"
+               />
+             </div>
+   
+             <div>
+               <h2 className="text-teal-900 font-bold text-lg sm:text-xl mb-1">
+                 {company}
+               </h2>
+               <p className="text-teal-800 font-medium">{role}</p>
+             </div>
            </div>
    
-           <h2 className="text-teal-900 font-bold text-lg sm:text-xl mb-0.5">
-             {company}
-           </h2>
-           <p className="text-teal-800 font-medium mb-3">{role}</p>
-   
+           {/* Techstack chips */}
            <div className="mb-4 flex flex-wrap gap-2">
              {techstack.map((t) => (
                <span
@@ -76,6 +81,7 @@
              ))}
            </div>
    
+           {/* Action Button */}
            {taken ? (
              <Link
                href={feedbackHref}

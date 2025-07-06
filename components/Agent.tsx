@@ -69,19 +69,16 @@ export default function Agent({ type }: AgentProps) {
     };
   }, []);
 
-  /* ─────────────────────────── post‑call redirect ─────── */
   useEffect(() => {
     if (callStatus === CallStatus.FINISHED && type === "generate") {
-      router.push("/");
+      router.push("/dashboard");
     }
   }, [callStatus, type, router]);
 
-  /* ─────────────────────────── call controls ──────────── */
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
     try {
-      // SDK v2.3.x signature: (assistant, assistantOv, squad, workflow, workflowOv)
       await vapi.start(
         undefined,                                   // assistantId
         undefined,                                   // assistantOverrides
@@ -105,7 +102,6 @@ export default function Agent({ type }: AgentProps) {
     setCallStatus(CallStatus.FINISHED);
   };
 
-  /* ───────────────────────── visuals & helpers ────────── */
   const latestMessage = messages[messages.length - 1]?.content;
 
   const fallbackSvg = useMemo(() => {
@@ -122,10 +118,8 @@ export default function Agent({ type }: AgentProps) {
 
   const photoSrc = user?.photoURL || fallbackSvg;
 
-  /* ─────────────────────────── JSX ────────────────────── */
   return (
     <>
-      {/* ─────────── avatars row ─────────── */}
       <section className="flex flex-col items-center justify-center gap-8 bg-teal-100 py-8 px-4 sm:flex-row sm:gap-18 sm:px-5">
         {/* AI avatar */}
         <article className="relative flex w-full max-w-[500px] flex-col items-center rounded-3xl border border-teal-500 bg-teal-300 px-4 py-8 sm:p-10 text-teal-800 shadow-2xl transition-transform hover:scale-105">

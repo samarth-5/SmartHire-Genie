@@ -2,9 +2,13 @@
 
 import Agent from '@/components/Agent';
 import { AuthGuard } from '@/firebase/AuthGuard';
+import useCurrentUser from '@/firebase/currentUser';
 import React from 'react';
 
 export default function InterviewGenerationPage() {
+
+  const user = useCurrentUser();
+
   return (
     <AuthGuard>
       <main className="min-h-screen bg-teal-100 text-teal-800 py-20 mt-4 sm:mt-10">
@@ -17,7 +21,7 @@ export default function InterviewGenerationPage() {
           </h2>
         </header>
 
-        <Agent type="generate" />
+        <Agent userName={user?.displayName!} userId={user?.uid} type="generate" />
       </main>
     </AuthGuard>
   );

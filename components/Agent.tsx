@@ -7,11 +7,6 @@ import { vapi } from "@/lib/vapi.sdk";
 import useCurrentUser from "@/firebase/currentUser";
 import { cn } from "@/lib/utils"; 
 
-interface AgentProps {
-  type: "generate" | "interview";
-  questions?: string[];
-}
-
 enum CallStatus {
   INACTIVE   = "INACTIVE",
   CONNECTING = "CONNECTING",
@@ -24,20 +19,25 @@ interface SavedMessage {
   content: string;
 }
 
-export default function Agent({ type }: AgentProps) {
+export default function Agent({
+  userName,
+  userId,
+  interviewId,
+  feedbackId,
+  type,
+  questions,
+}: AgentProps) {
   const router              = useRouter();
   const user                = useCurrentUser();
   const [isSpeaking,  setIsSpeaking]  = useState(false);
   const [callStatus,  setCallStatus]  = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages,    setMessages]    = useState<SavedMessage[]>([]);
-
-  const userName = user?.displayName;
-  const userId   = user?.uid;
-
+  
   useEffect(() => {
     const onCallStart   = ()     => setCallStatus(CallStatus.ACTIVE);
     const onCallEnd     = ()     => setCallStatus(CallStatus.FINISHED);
     const onSpeechStart = ()     => setIsSpeaking(true);
+
     const onSpeechEnd   = ()     => setIsSpeaking(false);
 
     const onMessage = (msg: Message) => {
@@ -48,7 +48,7 @@ export default function Agent({ type }: AgentProps) {
 
     const onError = (err: unknown) => console.error("Vapi Error:", err);
     const onStartFailed = (e: unknown) =>
-      console.error("call-start-failed ⇒", e); // extra insight
+    //console.error("call-start-failed ⇒", e); 
 
     vapi.on("call-start",        onCallStart);
     vapi.on("call-end",          onCallEnd);

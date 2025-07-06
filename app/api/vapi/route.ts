@@ -1,6 +1,6 @@
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
-import microsoft from "@/public/logos/microsoft.svg"
+import meta from "@/public/logos/meta.svg"
 import { db } from "@/firebase/config";
 import { addDoc, collection } from "firebase/firestore";
 //import { getRandomInterviewCover } from "@/lib/utils";
@@ -40,8 +40,9 @@ export async function POST(request: Request) {
         questions: JSON.parse(questions),
         userId: userid,
         finalized: true,
-        coverImage: microsoft,
+        coverImage: meta,
         createdAt: new Date().toISOString(),
+        taken: false
       };
   
       await addDoc(collection(db, "interviews"), interview);

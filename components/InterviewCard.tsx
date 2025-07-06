@@ -41,7 +41,6 @@ export default function InterviewCard({
          )}
        >
          <div className="rounded-[1.4rem] bg-teal-100/70 p-6 backdrop-blur-sm relative">
-           {/* Type Badge */}
            <span className="absolute top-3 right-3 z-10 rounded-full bg-teal-700/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
              {type}
            </span>

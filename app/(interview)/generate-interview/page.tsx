@@ -17,7 +17,7 @@ export default function InterviewGenerationPage() {
           </h2>
         </header>
 
-        <Agent />
+        <Agent type="generate" />
       </main>
     </AuthGuard>
   );

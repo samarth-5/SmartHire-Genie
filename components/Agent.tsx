@@ -2,8 +2,10 @@
 
 import useCurrentUser from "@/firebase/currentUser";
 import { cn } from "@/lib/utils";
+import { vapi } from "@/lib/vapi.sdk";
 import Image from "next/image";
-import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
 
 enum CallStatus {
   INACTIVE = "INACTIVE",
@@ -12,16 +14,105 @@ enum CallStatus {
   FINISHED = "FINISHED",
 }
 
-export default function Agent() {
+interface SavedMessage {
+  role: "user" | "system" | "assistant";
+  content: string;
+}
+
+export default function Agent({ type }: AgentProps) {
+
+  const router=useRouter(); 
+
   const user = useCurrentUser();
-  const [isSpeaking, setIsSpeaking] = useState(true);
-  const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.FINISHED);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
+  const [messages, setMessages] = useState<SavedMessage[]>([]);
+  //const [lastMessage, setLastMessage] = useState<string>("");
+  
+  //console.log(setIsSpeaking);
+  //console.log(setCallStatus);
+  //console.log(user);
+  const userName=user?.displayName;
+  const userId=user?.uid;
 
-  console.log(setIsSpeaking);
-  console.log(setCallStatus);
+  //const messages = ["What is your name?", "My name is Genie djkjdf sjkbjsknjb sjbjsbjbsbjs vdsjbvsd!"];
+  //const lastMessage = messages[messages.length - 1];
 
-  const messages = ["What is your name?", "My name is Genie djkjdf sjkbjsknjb sjbjsbjbsbjs vdsjbvsd!"];
-  const lastMessage = messages[messages.length - 1];
+  useEffect(() => {
+    const onCallStart = () => {
+      setCallStatus(CallStatus.ACTIVE);
+    };
+
+    const onCallEnd = () => {
+      setCallStatus(CallStatus.FINISHED);
+    };
+
+    const onMessage = (message: Message) => {
+      if (message.type === "transcript" && message.transcriptType === "final") {
+        const newMessage = { role: message.role, content: message.transcript };
+        setMessages((prev) => [...prev, newMessage]);
+      }
+    };
+
+    const onSpeechStart = () => {
+      console.log("speech start");
+      setIsSpeaking(true);
+    };
+
+    const onSpeechEnd = () => {
+      console.log("speech end");
+      setIsSpeaking(false);
+    };
+
+    const onError = (error: Error) => {
+      console.log("Error:", error);
+    };
+
+    vapi.on("call-start", onCallStart);
+    vapi.on("call-end", onCallEnd);
+    vapi.on("message", onMessage);
+    vapi.on("speech-start", onSpeechStart);
+    vapi.on("speech-end", onSpeechEnd);
+    vapi.on("error", onError);
+
+    return () => {
+      vapi.off("call-start", onCallStart);
+      vapi.off("call-end", onCallEnd);
+      vapi.off("message", onMessage);
+      vapi.off("speech-start", onSpeechStart);
+      vapi.off("speech-end", onSpeechEnd);
+      vapi.off("error", onError);
+    };
+  }, []);
+
+  useEffect(() => {
+        if (callStatus === CallStatus.FINISHED) {
+      if (type === "generate") {
+        router.push("/");
+      }
+    }
+  }, [messages, callStatus, router, type, userId]);
+
+  const handleCall = async () => {
+    setCallStatus(CallStatus.CONNECTING);
+
+    if (type === "generate") {
+      await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
+        variableValues: {
+          username: userName,
+          userid: userId,
+        },
+      });
+    } 
+  };
+
+  const handleDisconnect = () => {
+    setCallStatus(CallStatus.FINISHED);
+    vapi.stop();
+  };
+
+  const latestMessage=messages[messages.length-1]?.content;
+  //const isCallInactiveOrFinished=callStatus===CallStatus.INACTIVE || callStatus===CallStatus.FINISHED;
 
   // ── fallback SVG avatar ──────────────────────────────────────
   const defaultSvgDataUri = useMemo(() => {
@@ -79,20 +170,16 @@ export default function Agent() {
       {messages.length > 0 && (
         <div className="flex w-full justify-center px-4">
           <div className="w-full sm:max-w-md px-6 py-2 bg-teal-200/80 backdrop-blur-sm border-2 border-teal-500 rounded-xl shadow-lg text-center text-lg font-medium text-teal-900">
-            {lastMessage}
+            {latestMessage}
           </div>
         </div>
       )}
 
       <div className="flex w-full justify-center mt-6">
         {callStatus !== CallStatus.ACTIVE ? (
-          <button
-            type="button"
-            aria-label={
+          <button onClick={handleCall} type="button" aria-label={
               callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED
-                ? "Start Call"
-                : "Connecting"
-            }
+                ? "Start Call" : "Connecting"}
             className={cn(
               "relative px-6 py-3 rounded-full bg-teal-400 outline-1 outline-teal-600 text-white font-semibold",
               "flex items-center justify-center gap-2",
@@ -116,11 +203,8 @@ export default function Agent() {
             </span>
           </button>
         ) : (
-          <button
-            type="button"
-            aria-label="End Call"
-            className="px-6 py-3 rounded-full bg-red-500 text-white font-semibold flex items-center gap-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 active:scale-95 transition"
-          >
+          <button onClick={handleDisconnect} type="button" aria-label="End Call"
+            className="px-6 py-3 rounded-full bg-red-500 text-white font-semibold flex items-center gap-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 active:scale-95 transition">
             End Call
           </button>
         )}

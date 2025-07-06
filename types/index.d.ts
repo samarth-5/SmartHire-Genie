@@ -48,10 +48,8 @@ interface Feedback {
   }
   
   interface AgentProps {
-    userName: string;
-    userId?: string;
-    interviewId?: string;
-    feedbackId?: string;
+    // interviewId?: string;
+    //feedbackId?: string;
     type: "generate" | "interview";
     questions?: string[];
   }

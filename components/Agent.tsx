@@ -1,17 +1,22 @@
 "use client";
 
-import useCurrentUser from "@/firebase/currentUser";
-import { cn } from "@/lib/utils";
-import { vapi } from "@/lib/vapi.sdk";
+import React, { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import { vapi } from "@/lib/vapi.sdk";
+import useCurrentUser from "@/firebase/currentUser";
+import { cn } from "@/lib/utils"; 
+
+interface AgentProps {
+  type: "generate" | "interview";
+  questions?: string[];
+}
 
 enum CallStatus {
-  INACTIVE = "INACTIVE",
+  INACTIVE   = "INACTIVE",
   CONNECTING = "CONNECTING",
-  ACTIVE = "ACTIVE",
-  FINISHED = "FINISHED",
+  ACTIVE     = "ACTIVE",
+  FINISHED   = "FINISHED",
 }
 
 interface SavedMessage {
@@ -20,102 +25,90 @@ interface SavedMessage {
 }
 
 export default function Agent({ type }: AgentProps) {
+  const router              = useRouter();
+  const user                = useCurrentUser();
+  const [isSpeaking,  setIsSpeaking]  = useState(false);
+  const [callStatus,  setCallStatus]  = useState<CallStatus>(CallStatus.INACTIVE);
+  const [messages,    setMessages]    = useState<SavedMessage[]>([]);
 
-  const router=useRouter(); 
-
-  const user = useCurrentUser();
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
-  const [messages, setMessages] = useState<SavedMessage[]>([]);
-  //const [lastMessage, setLastMessage] = useState<string>("");
-  
-  //console.log(setIsSpeaking);
-  //console.log(setCallStatus);
-  //console.log(user);
-  const userName=user?.displayName;
-  const userId=user?.uid;
-
-  //const messages = ["What is your name?", "My name is Genie djkjdf sjkbjsknjb sjbjsbjbsbjs vdsjbvsd!"];
-  //const lastMessage = messages[messages.length - 1];
+  const userName = user?.displayName;
+  const userId   = user?.uid;
 
   useEffect(() => {
-    const onCallStart = () => {
-      setCallStatus(CallStatus.ACTIVE);
-    };
+    const onCallStart   = ()     => setCallStatus(CallStatus.ACTIVE);
+    const onCallEnd     = ()     => setCallStatus(CallStatus.FINISHED);
+    const onSpeechStart = ()     => setIsSpeaking(true);
+    const onSpeechEnd   = ()     => setIsSpeaking(false);
 
-    const onCallEnd = () => {
-      setCallStatus(CallStatus.FINISHED);
-    };
-
-    const onMessage = (message: Message) => {
-      if (message.type === "transcript" && message.transcriptType === "final") {
-        const newMessage = { role: message.role, content: message.transcript };
-        setMessages((prev) => [...prev, newMessage]);
+    const onMessage = (msg: Message) => {
+      if (msg.type === "transcript" && msg.transcriptType === "final") {
+        setMessages(prev => [...prev, { role: msg.role, content: msg.transcript }]);
       }
     };
 
-    const onSpeechStart = () => {
-      console.log("speech start");
-      setIsSpeaking(true);
-    };
+    const onError = (err: unknown) => console.error("Vapi Error:", err);
+    const onStartFailed = (e: unknown) =>
+      console.error("call-start-failed ⇒", e); // extra insight
 
-    const onSpeechEnd = () => {
-      console.log("speech end");
-      setIsSpeaking(false);
-    };
-
-    const onError = (error: Error) => {
-      console.log("Error:", error);
-    };
-
-    vapi.on("call-start", onCallStart);
-    vapi.on("call-end", onCallEnd);
-    vapi.on("message", onMessage);
-    vapi.on("speech-start", onSpeechStart);
-    vapi.on("speech-end", onSpeechEnd);
-    vapi.on("error", onError);
+    vapi.on("call-start",        onCallStart);
+    vapi.on("call-end",          onCallEnd);
+    vapi.on("speech-start",      onSpeechStart);
+    vapi.on("speech-end",        onSpeechEnd);
+    vapi.on("message",           onMessage);
+    vapi.on("error",             onError);
+    vapi.on("call-start-failed", onStartFailed);
 
     return () => {
-      vapi.off("call-start", onCallStart);
-      vapi.off("call-end", onCallEnd);
-      vapi.off("message", onMessage);
-      vapi.off("speech-start", onSpeechStart);
-      vapi.off("speech-end", onSpeechEnd);
-      vapi.off("error", onError);
+      vapi.off("call-start",        onCallStart);
+      vapi.off("call-end",          onCallEnd);
+      vapi.off("speech-start",      onSpeechStart);
+      vapi.off("speech-end",        onSpeechEnd);
+      vapi.off("message",           onMessage);
+      vapi.off("error",             onError);
+      vapi.off("call-start-failed", onStartFailed);
     };
   }, []);
 
+  /* ─────────────────────────── post‑call redirect ─────── */
   useEffect(() => {
-        if (callStatus === CallStatus.FINISHED) {
-      if (type === "generate") {
-        router.push("/");
-      }
+    if (callStatus === CallStatus.FINISHED && type === "generate") {
+      router.push("/");
     }
-  }, [messages, callStatus, router, type, userId]);
+  }, [callStatus, type, router]);
 
+  /* ─────────────────────────── call controls ──────────── */
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
 
-    if (type === "generate") {
-      await vapi.start(process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!, {
-        variableValues: {
-          username: userName,
-          userid: userId,
+    try {
+      // SDK v2.3.x signature: (assistant, assistantOv, squad, workflow, workflowOv)
+      await vapi.start(
+        undefined,                                   // assistantId
+        undefined,                                   // assistantOverrides
+        undefined,                                   // squadId
+        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,   // workflowId ✅
+        {
+          variableValues: {
+            username: userName ?? "Guest",
+            userid:   userId   ?? "anonymous",
+          },
         },
-      });
-    } 
+      );
+    } catch (err) {
+      console.error("Failed to start Vapi:", err);
+      setCallStatus(CallStatus.INACTIVE);
+    }
   };
 
   const handleDisconnect = () => {
-    setCallStatus(CallStatus.FINISHED);
     vapi.stop();
+    setCallStatus(CallStatus.FINISHED);
   };
 
-  const latestMessage=messages[messages.length-1]?.content;
-  //const isCallInactiveOrFinished=callStatus===CallStatus.INACTIVE || callStatus===CallStatus.FINISHED;
+  /* ───────────────────────── visuals & helpers ────────── */
+  const latestMessage = messages[messages.length - 1]?.content;
 
-  // ── fallback SVG avatar ──────────────────────────────────────
-  const defaultSvgDataUri = useMemo(() => {
+  const fallbackSvg = useMemo(() => {
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none">
         <rect width="200" height="200" rx="100" fill="#E0F2F1"/>
@@ -123,17 +116,18 @@ export default function Agent({ type }: AgentProps) {
         <path d="M56 183a44 44 0 0 1 88 0H56Z" fill="#FFF"/>
         <path d="M30 183c4-48 29-75 70-75s66 27 70 75H30Z" fill="#00695C"/>
         <path d="M95 108h10v40l-5 10-5-10v-40Z" fill="#D32F2F"/>
-      </svg>
-    `;
-    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+      </svg>`;
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
   }, []);
 
-  const photoSrc = user?.photoURL || defaultSvgDataUri;
+  const photoSrc = user?.photoURL || fallbackSvg;
 
+  /* ─────────────────────────── JSX ────────────────────── */
   return (
     <>
+      {/* ─────────── avatars row ─────────── */}
       <section className="flex flex-col items-center justify-center gap-8 bg-teal-100 py-8 px-4 sm:flex-row sm:gap-18 sm:px-5">
-        {/* AI Interviewer */}
+        {/* AI avatar */}
         <article className="relative flex w-full max-w-[500px] flex-col items-center rounded-3xl border border-teal-500 bg-teal-300 px-4 py-8 sm:p-10 text-teal-800 shadow-2xl transition-transform hover:scale-105">
           <div className="relative mb-7">
             <Image
@@ -144,12 +138,14 @@ export default function Agent({ type }: AgentProps) {
               className="size-[200px] rounded-full border-2 border-teal-600 object-cover"
               priority
             />
-            {isSpeaking && <span className="animate-speak" />}
+            {isSpeaking && (
+              <span className="absolute right-3 top-3 h-4 w-4 animate-ping rounded-full bg-green-400" />
+            )}
           </div>
           <h3 className="text-3xl font-extrabold tracking-wide">Genie</h3>
         </article>
 
-        {/* Candidate (hidden on mobile) */}
+        {/* User avatar (hidden on small) */}
         <article className="relative hidden w-full max-w-[500px] flex-col items-center rounded-3xl border border-teal-500 bg-teal-200 px-4 py-8 sm:flex sm:p-10 text-teal-700 shadow-2xl transition-transform hover:scale-105">
           <div className="relative mb-7">
             <Image
@@ -167,7 +163,8 @@ export default function Agent({ type }: AgentProps) {
         </article>
       </section>
 
-      {messages.length > 0 && (
+      {/* ───────── latest transcript bubble ───────── */}
+      {latestMessage && (
         <div className="flex w-full justify-center px-4">
           <div className="w-full sm:max-w-md px-6 py-2 bg-teal-200/80 backdrop-blur-sm border-2 border-teal-500 rounded-xl shadow-lg text-center text-lg font-medium text-teal-900">
             {latestMessage}
@@ -175,36 +172,37 @@ export default function Agent({ type }: AgentProps) {
         </div>
       )}
 
+      {/* ───────── call buttons ───────── */}
       <div className="flex w-full justify-center mt-6">
         {callStatus !== CallStatus.ACTIVE ? (
-          <button onClick={handleCall} type="button" aria-label={
-              callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED
-                ? "Start Call" : "Connecting"}
+          <button
+            onClick={handleCall}
+            type="button"
+            aria-label={callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED ? "Start Call" : "Connecting"}
+            disabled={callStatus === CallStatus.CONNECTING}
             className={cn(
-              "relative px-6 py-3 rounded-full bg-teal-400 outline-1 outline-teal-600 text-white font-semibold",
+              "relative px-6 py-3 rounded-full bg-teal-400 text-white font-semibold",
               "flex items-center justify-center gap-2",
               "hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500",
               "active:scale-95 transition disabled:opacity-60 disabled:pointer-events-none"
             )}
-            disabled={callStatus === CallStatus.CONNECTING}
           >
-            <span
-              className={cn(
-                "absolute inset-0 flex items-center justify-center",
-                callStatus === CallStatus.CONNECTING ? "animate-ping" : "hidden"
-              )}
-            >
-              <span className="block h-full w-full rounded-full bg-teal-500 opacity-75" />
-            </span>
+            {callStatus === CallStatus.CONNECTING && (
+              <span className="absolute inset-0 flex items-center justify-center animate-ping">
+                <span className="h-full w-full rounded-full bg-teal-500 opacity-75" />
+              </span>
+            )}
             <span className="relative z-[1]">
-              {callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED
-                ? "Start Call"
-                : ". . ."}
+              {callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED ? "Start Call" : ". . ."}
             </span>
           </button>
         ) : (
-          <button onClick={handleDisconnect} type="button" aria-label="End Call"
-            className="px-6 py-3 rounded-full bg-red-500 text-white font-semibold flex items-center gap-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 active:scale-95 transition">
+          <button
+            onClick={handleDisconnect}
+            type="button"
+            aria-label="End Call"
+            className="px-6 py-3 rounded-full bg-red-500 text-white font-semibold flex items-center gap-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 active:scale-95 transition"
+          >
             End Call
           </button>
         )}

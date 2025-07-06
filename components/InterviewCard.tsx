@@ -1,13 +1,10 @@
-/* =========================================
-   components/InterviewCard.tsx
-   ========================================= */
-   "use client";
+"use client";
 
-   import Image from "next/image";
-   import Link from "next/link";
-   import { cn } from "@/lib/utils";
+import Image from "next/image";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
    
-   export type InterviewCardProps = {
+export type InterviewCardProps = {
      company: string;
      role: string;
      type: string; // e.g., "Technical"
@@ -23,9 +20,9 @@
      taken: boolean;
      startHref?: string;
      feedbackHref?: string;
-   };
+};
    
-   export default function InterviewCard({
+export default function InterviewCard({
      company,
      role,
      type,
@@ -49,7 +46,6 @@
              {type}
            </span>
    
-           {/* Top layout: Logo + Info */}
            <div className="flex items-start gap-4 mb-4">
              <div className="relative h-20 w-20 min-w-[5rem] rounded-lg overflow-hidden bg-teal-50">
                <Image
@@ -69,7 +65,6 @@
              </div>
            </div>
    
-           {/* Techstack chips */}
            <div className="mb-4 flex flex-wrap gap-2">
              {techstack.map((t) => (
                <span
@@ -81,7 +76,6 @@
              ))}
            </div>
    
-           {/* Action Button */}
            {taken ? (
              <Link
                href={feedbackHref}

@@ -4,35 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
    
-export type InterviewCardProps = {
-     company: string;
-     role: string;
-     type: string; // e.g., "Technical"
-     techstack: string[];
-     coverImage?: {
-       src: string;
-       height?: number;
-       width?: number;
-       blurDataURL?: string | null;
-       blurHeight?: number;
-       blurWidth?: number;
-     };
-     taken: boolean;
-     startHref?: string;
-     feedbackHref?: string;
-};
    
 export default function InterviewCard({
+     interviewId,
      company,
      role,
      type,
      techstack,
      coverImage,
-     taken,
-     startHref = "#",
-     feedbackHref = "#",
+     taken,     
    }: InterviewCardProps) {
-     return (
+
+    return (
        <div
          className={cn(
            "group relative overflow-hidden rounded-3xl p-[1px] transition-transform duration-300",
@@ -77,14 +60,14 @@ export default function InterviewCard({
    
            {taken ? (
              <Link
-               href={feedbackHref}
+               href={`/generate-interview/${interviewId}/feedback`}
                className="block rounded-full border border-teal-600 py-2 text-center text-sm font-semibold text-teal-700 transition-colors hover:bg-teal-600 hover:text-white"
              >
                View Feedback
              </Link>
            ) : (
              <Link
-               href={startHref}
+               href={`/generate-interview/${interviewId}`}
                className="block rounded-full bg-teal-600 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-teal-700"
              >
                Start Interview

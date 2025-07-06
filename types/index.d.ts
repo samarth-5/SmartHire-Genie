@@ -29,12 +29,30 @@ interface AgentProps {
   questions?: string[];
 }
 
-// interface RouteParams {
-//   params: Promise<Record<string, string>>;
-//   searchParams: Promise<Record<string, string>>;
-// }
+interface RouteParams {
+  params: Promise<Record<string, string>>;
+  searchParams: Promise<Record<string, string>>;
+}
 
 interface GetFeedbackByInterviewIdParams {
   interviewId: string;
   userId: string;
+}
+
+interface InterviewCardProps {
+  interviewId?: string;
+  userId?: string;
+  company: string;
+  role: string;
+  type: string;
+  techstack: string[];
+  coverImage?: {
+    src: string;
+    height?: number;
+    width?: number;
+    blurDataURL?: string | null;
+    blurHeight?: number;
+    blurWidth?: number;
+  };
+  taken: boolean
 }

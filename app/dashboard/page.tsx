@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import InterviewCard, { InterviewCardProps } from "@/components/InterviewCard";
+import InterviewCard from "@/components/InterviewCard";
 import { AuthGuard } from "@/firebase/AuthGuard";
 import { useAuth } from "@/firebase/AuthContext";
 import { db } from "@/firebase/config";
@@ -14,7 +14,6 @@ import {
   DocumentData,
 } from "firebase/firestore";
 
-/* ---------- relaxed Interview type ---------- */
 type Interview = Omit<InterviewCardProps, "coverImage"> & {
   id: string;
   coverImage?: {
@@ -120,8 +119,16 @@ export default function DashboardPage() {
               <p className="text-teal-700">Loading…</p>
             ) : finished.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {finished.map((iv) => (
-                  <InterviewCard key={iv.id} {...(iv as InterviewCardProps)} />
+                {finished.map((interview) => (
+                  <InterviewCard
+                  key={interview.id}
+                  interviewId={interview.id}
+                  company={interview.company}
+                  role={interview.role}
+                  type={interview.type}
+                  techstack={interview.techstack}
+                  coverImage={interview.coverImage}
+                  taken={true} />
                 ))}
               </div>
             ) : (
@@ -144,8 +151,17 @@ export default function DashboardPage() {
               <p className="text-teal-700">Loading…</p>
             ) : upcoming.length > 0 ? (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {upcoming.map((iv) => (
-                  <InterviewCard key={iv.id} {...(iv as InterviewCardProps)} />
+                {upcoming.map((interview) => (
+                  <InterviewCard
+                  key={interview.id}
+                  interviewId={interview.id}
+                  company={interview.company}
+                  role={interview.role}
+                  type={interview.type}
+                  techstack={interview.techstack}
+                  coverImage={interview.coverImage}
+                  taken={false}
+                />
                 ))}
               </div>
             ) : (

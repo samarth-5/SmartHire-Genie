@@ -39,6 +39,26 @@ interface GetFeedbackByInterviewIdParams {
   userId: string;
 }
 
+interface Interview {
+  role: string;
+  level: string;
+  questions: string[];
+  techstack: string[];
+  createdAt: string;
+  userId: string;
+  type: string;
+  finalized: boolean;
+  taken: boolean;
+  coverImage?: {
+    src: string;
+    height?: number;
+    width?: number;
+    blurDataURL?: string | null;
+    blurHeight?: number;
+    blurWidth?: number;
+  };
+}
+
 interface InterviewCardProps {
   interviewId?: string;
   userId?: string;
@@ -46,6 +66,7 @@ interface InterviewCardProps {
   role: string;
   type: string;
   techstack: string[];
+  questions: string[];
   coverImage?: {
     src: string;
     height?: number;

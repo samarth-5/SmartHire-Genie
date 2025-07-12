@@ -40,6 +40,7 @@ interface GetFeedbackByInterviewIdParams {
 }
 
 interface Interview {
+  id: String;
   role: string;
   level: string;
   questions: string[];

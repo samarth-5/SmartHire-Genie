@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi.sdk";
 import useCurrentUser from "@/firebase/currentUser";
 import { cn } from "@/lib/utils"; 
+import { interviewerAssistant } from "@/app/api/vapi/interviewer-assistant";
 
 enum CallStatus {
   INACTIVE   = "INACTIVE",
@@ -70,8 +71,11 @@ export default function Agent({
   }, []);
 
   useEffect(() => {
-    if (callStatus === CallStatus.FINISHED && type === "generate") {
+    if (callStatus === CallStatus.FINISHED) {
+      if(type === "generate")
       router.push("/dashboard");
+      else
+      {}
     }
   }, [callStatus, type, router]);
 
@@ -79,6 +83,8 @@ export default function Agent({
     setCallStatus(CallStatus.CONNECTING);
 
     try {
+      if(type === "generate")
+      {
       await vapi.start(
         undefined,                                   // assistantId
         undefined,                                   // assistantOverrides
@@ -91,6 +97,22 @@ export default function Agent({
           },
         },
       );
+      }
+      else
+      {
+        let formattedQuestions = "";
+      if (questions) {
+        formattedQuestions = questions
+          .map((question) => `- ${question}`)
+          .join("\n");
+      }
+
+      await vapi.start(interviewerAssistant, {
+        variableValues: {
+          questions: formattedQuestions,
+        },
+      });
+      }
     } catch (err) {
       console.error("Failed to start Vapi:", err);
       setCallStatus(CallStatus.INACTIVE);

@@ -24,7 +24,8 @@
        (async () => {
          if (!id) return;
          const data = await getInterviewById(id);
-         if (!data) router.replace('/dashboard'); // not found → dashboard
+         if (!data) 
+          router.replace('/dashboard'); // not found → dashboard
          else setInterview(data as InterviewCardProps);
        })();
      }, [id, router]);

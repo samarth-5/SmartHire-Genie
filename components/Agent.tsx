@@ -5,17 +5,17 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi.sdk";
 import useCurrentUser from "@/firebase/currentUser";
-import { cn } from "@/lib/utils"; 
+import { cn } from "@/lib/utils";
 import { interviewerAssistant } from "@/app/api/vapi/interviewer-assistant";
 import { createFeedback } from "@/lib/interview";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "@/firebase/config";
 
 enum CallStatus {
-  INACTIVE   = "INACTIVE",
+  INACTIVE = "INACTIVE",
   CONNECTING = "CONNECTING",
-  ACTIVE     = "ACTIVE",
-  FINISHED   = "FINISHED",
+  ACTIVE = "ACTIVE",
+  FINISHED = "FINISHED",
 }
 
 interface SavedMessage {
@@ -31,19 +31,23 @@ export default function Agent({
   type,
   questions,
 }: AgentProps) {
-  const router              = useRouter();
-  const user                = useCurrentUser();
-  const [isSpeaking,  setIsSpeaking]  = useState(false);
-  const [callStatus,  setCallStatus]  = useState<CallStatus>(CallStatus.INACTIVE);
-  const [messages,    setMessages]    = useState<SavedMessage[]>([]);
-  
+  const router = useRouter();
+  const user = useCurrentUser();
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
+  const [messages, setMessages] = useState<SavedMessage[]>([]);
+  const [microphoneAllowed, setMicrophoneAllowed] = useState(false);
+
   useEffect(() => {
-    const onCallStart   = ()     => setCallStatus(CallStatus.ACTIVE);
-    const onCallEnd     = ()     => setCallStatus(CallStatus.FINISHED);
-    const onSpeechStart = ()     => setIsSpeaking(true);
-
-    const onSpeechEnd   = ()     => setIsSpeaking(false);
-
+    const onCallStart = () => {
+      setCallStatus(CallStatus.ACTIVE);
+      setMicrophoneAllowed(true);
+    };
+    const onCallEnd = () => {
+      setCallStatus(CallStatus.FINISHED);
+    };
+    const onSpeechStart = () => setIsSpeaking(true);
+    const onSpeechEnd = () => setIsSpeaking(false);
     const onMessage = (msg: Message) => {
       if (msg.type === "transcript" && msg.transcriptType === "final") {
         setMessages(prev => [...prev, { role: msg.role, content: msg.transcript }]);
@@ -51,35 +55,29 @@ export default function Agent({
     };
 
     const onError = (err: unknown) => console.error("Vapi Error:", err);
-    const onStartFailed = (e: unknown) =>
-    //console.error("call-start-failed ⇒", e); 
+    const onStartFailed = (e: unknown) => console.error("call-start-failed ⇒", e);
 
-    vapi.on("call-start",        onCallStart);
-    vapi.on("call-end",          onCallEnd);
-    vapi.on("speech-start",      onSpeechStart);
-    vapi.on("speech-end",        onSpeechEnd);
-    vapi.on("message",           onMessage);
-    vapi.on("error",             onError);
+    vapi.on("call-start", onCallStart);
+    vapi.on("call-end", onCallEnd);
+    vapi.on("speech-start", onSpeechStart);
+    vapi.on("speech-end", onSpeechEnd);
+    vapi.on("message", onMessage);
+    vapi.on("error", onError);
     vapi.on("call-start-failed", onStartFailed);
 
     return () => {
-      vapi.off("call-start",        onCallStart);
-      vapi.off("call-end",          onCallEnd);
-      vapi.off("speech-start",      onSpeechStart);
-      vapi.off("speech-end",        onSpeechEnd);
-      vapi.off("message",           onMessage);
-      vapi.off("error",             onError);
+      vapi.off("call-start", onCallStart);
+      vapi.off("call-end", onCallEnd);
+      vapi.off("speech-start", onSpeechStart);
+      vapi.off("speech-end", onSpeechEnd);
+      vapi.off("message", onMessage);
+      vapi.off("error", onError);
       vapi.off("call-start-failed", onStartFailed);
     };
   }, []);
 
   useEffect(() => {
-    // if (messages.length > 0) {
-    //   setLastMessage(messages[messages.length - 1].content);
-    // }
     const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-      console.log("handleGenerateFeedback");
-
       const { success, feedbackId: id } = await createFeedback({
         interviewId: interviewId!,
         userId: userId!,
@@ -87,63 +85,49 @@ export default function Agent({
         feedbackId,
       });
 
-      
-if (success && id && interviewId) {
-  try {
-    const interviewRef = doc(db, "interviews", interviewId);
-    await updateDoc(interviewRef, {
-      taken: true,
-    });
-  } catch (error) {
-    console.error("Failed to update 'taken':", error);
-  }
-} else {
-  console.log("Error saving feedback!");
-}
-router.push("/dashboard");
+      if (success && id && interviewId) {
+        try {
+          const interviewRef = doc(db, "interviews", interviewId);
+          await updateDoc(interviewRef, { taken: true });
+        } catch (error) {
+          console.error("Failed to update 'taken':", error);
+        }
+      } else {
+        console.log("Error saving feedback!");
+      }
+      router.push("/dashboard");
     };
 
     if (callStatus === CallStatus.FINISHED) {
-      if(type === "generate")
-      router.push("/dashboard");
-      else
-      handleGenerateFeedback(messages);
+      if (type === "generate") router.push("/dashboard");
+      else handleGenerateFeedback(messages);
     }
   }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);
-
     try {
-      if(type === "generate")
-      {
-      await vapi.start(
-        undefined,                                   // assistantId
-        undefined,                                   // assistantOverrides
-        undefined,                                   // squadId
-        process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,   // workflowId ✅
-        {
-          variableValues: {
-            username: userName ?? "Guest",
-            userid:   userId   ?? "anonymous",
-          },
-        },
-      );
-      }
-      else
-      {
+      if (type === "generate") {
+        await vapi.start(
+          undefined,
+          undefined,
+          undefined,
+          process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,
+          {
+            variableValues: {
+              username: userName ?? "Guest",
+              userid: userId ?? "anonymous",
+            },
+          }
+        );
+      } else {
         let formattedQuestions = "";
-      if (questions) {
-        formattedQuestions = questions
-          .map((question) => `- ${question}`)
-          .join("\n");
-      }
-
-      await vapi.start(interviewerAssistant, {
-        variableValues: {
-          questions: formattedQuestions,
-        },
-      });
+        if (questions) {
+          formattedQuestions = questions.map(q => `- ${q}`).join("\n");
+        }
+        await vapi.start(interviewerAssistant, {
+          variableValues: { questions: formattedQuestions },
+        });
       }
     } catch (err) {
       console.error("Failed to start Vapi:", err);
@@ -175,7 +159,6 @@ router.push("/dashboard");
   return (
     <>
       <section className="flex flex-col items-center justify-center gap-8 bg-teal-100 py-8 px-4 sm:flex-row sm:gap-18 sm:px-5">
-        {/* AI avatar */}
         <article className="relative flex w-full max-w-[500px] flex-col items-center rounded-3xl border border-teal-500 bg-teal-300 px-4 py-8 sm:p-10 text-teal-800 shadow-2xl transition-transform hover:scale-105">
           <div className="relative mb-7">
             <Image
@@ -193,7 +176,6 @@ router.push("/dashboard");
           <h3 className="text-3xl font-extrabold tracking-wide">Genie</h3>
         </article>
 
-        {/* User avatar (hidden on small) */}
         <article className="relative hidden w-full max-w-[500px] flex-col items-center rounded-3xl border border-teal-500 bg-teal-200 px-4 py-8 sm:flex sm:p-10 text-teal-700 shadow-2xl transition-transform hover:scale-105">
           <div className="relative mb-7">
             <Image
@@ -211,7 +193,6 @@ router.push("/dashboard");
         </article>
       </section>
 
-      {/* ───────── latest transcript bubble ───────── */}
       {latestMessage && (
         <div className="flex w-full justify-center px-4">
           <div className="w-full sm:max-w-md px-6 py-2 bg-teal-200/80 backdrop-blur-sm border-2 border-teal-500 rounded-xl shadow-lg text-center text-lg font-medium text-teal-900">
@@ -220,7 +201,6 @@ router.push("/dashboard");
         </div>
       )}
 
-      {/* ───────── call buttons ───────── */}
       <div className="flex w-full justify-center mt-6">
         {callStatus !== CallStatus.ACTIVE ? (
           <button
@@ -235,13 +215,13 @@ router.push("/dashboard");
               "active:scale-95 transition disabled:opacity-60 disabled:pointer-events-none"
             )}
           >
-            {callStatus === CallStatus.CONNECTING && (
+            {callStatus === CallStatus.CONNECTING && !microphoneAllowed && (
               <span className="absolute inset-0 flex items-center justify-center animate-ping">
                 <span className="h-full w-full rounded-full bg-teal-500 opacity-75" />
               </span>
             )}
             <span className="relative z-[1]">
-              {callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED ? "Start Call" : ". . ."}
+              {callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED ? "Start\u00A0Call" : ". . ."}
             </span>
           </button>
         ) : (
@@ -251,7 +231,7 @@ router.push("/dashboard");
             aria-label="End Call"
             className="px-6 py-3 rounded-full bg-red-500 text-white font-semibold flex items-center gap-2 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 active:scale-95 transition"
           >
-            End Call
+            End Call
           </button>
         )}
       </div>

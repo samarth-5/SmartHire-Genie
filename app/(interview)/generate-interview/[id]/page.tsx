@@ -1,6 +1,3 @@
-/* app/(interview)/generate-interview/[id]/page.tsx
-   ONE client component – no extra files needed ✅ */
-
    'use client';
 
    import React, { useEffect, useState } from 'react';
@@ -25,7 +22,7 @@
          if (!id) return;
          const data = await getInterviewById(id);
          if (!data) 
-          router.replace('/dashboard'); // not found → dashboard
+          router.replace('/dashboard'); 
          else setInterview(data as InterviewCardProps);
        })();
      }, [id, router]);

@@ -7,6 +7,9 @@ import { vapi } from "@/lib/vapi.sdk";
 import useCurrentUser from "@/firebase/currentUser";
 import { cn } from "@/lib/utils"; 
 import { interviewerAssistant } from "@/app/api/vapi/interviewer-assistant";
+import { createFeedback } from "@/lib/interview";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "@/firebase/config";
 
 enum CallStatus {
   INACTIVE   = "INACTIVE",
@@ -71,13 +74,42 @@ export default function Agent({
   }, []);
 
   useEffect(() => {
+    // if (messages.length > 0) {
+    //   setLastMessage(messages[messages.length - 1].content);
+    // }
+    const handleGenerateFeedback = async (messages: SavedMessage[]) => {
+      console.log("handleGenerateFeedback");
+
+      const { success, feedbackId: id } = await createFeedback({
+        interviewId: interviewId!,
+        userId: userId!,
+        transcript: messages,
+        feedbackId,
+      });
+
+      
+if (success && id && interviewId) {
+  try {
+    const interviewRef = doc(db, "interviews", interviewId);
+    await updateDoc(interviewRef, {
+      taken: true,
+    });
+  } catch (error) {
+    console.error("Failed to update 'taken':", error);
+  }
+} else {
+  console.log("Error saving feedback!");
+}
+router.push("/dashboard");
+    };
+
     if (callStatus === CallStatus.FINISHED) {
       if(type === "generate")
       router.push("/dashboard");
       else
-      {}
+      handleGenerateFeedback(messages);
     }
-  }, [callStatus, type, router]);
+  }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
 
   const handleCall = async () => {
     setCallStatus(CallStatus.CONNECTING);

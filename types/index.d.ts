@@ -67,7 +67,6 @@ interface InterviewCardProps {
   role: string;
   type: string;
   techstack: string[];
-  questions: string[];
   coverImage?: {
     src: string;
     height?: number;

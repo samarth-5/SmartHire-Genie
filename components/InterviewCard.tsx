@@ -60,7 +60,7 @@ export default function InterviewCard({
    
            {taken ? (
              <Link
-               href={`/generate-interview/${interviewId}/feedback`}
+               href={`/interview/${interviewId}/feedback`}
                className="block rounded-full border border-teal-600 py-2 text-center text-sm font-semibold text-teal-700 transition-colors hover:bg-teal-600 hover:text-white"
              >
                View Feedback

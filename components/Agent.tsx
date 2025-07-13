@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { vapi } from "@/lib/vapi.sdk";
@@ -37,20 +37,37 @@ export default function Agent({
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [microphoneAllowed, setMicrophoneAllowed] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null); // Added error state
+  const messagesRef = useRef<SavedMessage[]>([]);
 
   useEffect(() => {
     const onCallStart = () => {
+      console.log("Call started");
       setCallStatus(CallStatus.ACTIVE);
       setMicrophoneAllowed(true);
     };
+
     const onCallEnd = () => {
+      console.log("Call ended");
       setCallStatus(CallStatus.FINISHED);
     };
-    const onSpeechStart = () => setIsSpeaking(true);
-    const onSpeechEnd = () => setIsSpeaking(false);
-    const onMessage = (msg: Message) => {
+
+    const onSpeechStart = () => {
+      console.log("Speech started");
+      setIsSpeaking(true);
+    };
+
+    const onSpeechEnd = () => {
+      console.log("Speech ended");
+      setIsSpeaking(false);
+    };
+
+    const onMessage = (msg: any) => {
       if (msg.type === "transcript" && msg.transcriptType === "final") {
-        setMessages(prev => [...prev, { role: msg.role, content: msg.transcript }]);
+        console.log("New message:", msg);
+        const newMessage = { role: msg.role, content: msg.transcript };
+        messagesRef.current = [...messagesRef.current, newMessage];
+        setMessages(prev => [...prev, newMessage]);
       }
     };
 
@@ -76,38 +93,87 @@ export default function Agent({
     };
   }, []);
 
+  // FIXED: Improved feedback generation with better error handling
   useEffect(() => {
-    const handleGenerateFeedback = async (messages: SavedMessage[]) => {
-      const { success, feedbackId: id } = await createFeedback({
-        interviewId: interviewId!,
-        userId: userId!,
-        transcript: messages,
-        feedbackId,
-      });
-
-      if (success && id && interviewId) {
-        try {
-          const interviewRef = doc(db, "interviews", interviewId);
-          await updateDoc(interviewRef, { taken: true });
-        } catch (error) {
-          console.error("Failed to update 'taken':", error);
-        }
-      } else {
-        console.log("Error saving feedback!");
+    const handleGenerateFeedback = async () => {
+      if (!interviewId || !userId) {
+        console.error("Missing required parameters");
+        router.push("/dashboard");
+        return;
       }
-      router.push("/dashboard");
+
+      const messagesToUse = messagesRef.current;
+      console.log("Generating feedback with messages:", messagesToUse);
+
+      if (!messagesToUse.length) {
+        console.log("No messages to generate feedback from");
+        setFeedbackError("No conversation recorded - cannot generate feedback");
+        router.push("/dashboard");
+        return;
+      }
+
+      try {
+        console.log("Creating feedback with params:", {
+          interviewId,
+          userId,
+          transcript: messagesToUse,
+          feedbackId
+        });
+
+        const result = await createFeedback({
+          interviewId,
+          userId,
+          transcript: messagesToUse,
+          feedbackId,
+        });
+
+        console.log("Feedback creation result:", result);
+
+        if (result.success) {
+          if (result.feedbackId && interviewId) {
+            console.log("Feedback created successfully, updating interview");
+            const interviewRef = doc(db, "interviews", interviewId);
+            await updateDoc(interviewRef, { taken: true });
+          } else {
+            console.error("Feedback creation returned no ID");
+            setFeedbackError("Feedback created but no ID returned");
+          }
+        } else {
+          const errorMsg = result.error || "Feedback creation failed";
+          console.error("Feedback creation failed:", errorMsg);
+          setFeedbackError(errorMsg);
+        }
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : "Unknown error";
+        console.error("Error in feedback generation:", errorMsg);
+        setFeedbackError(errorMsg);
+      } finally {
+        router.push("/dashboard");
+      }
     };
 
     if (callStatus === CallStatus.FINISHED) {
-      if (type === "generate") router.push("/dashboard");
-      else handleGenerateFeedback(messages);
+      if (type === "generate") {
+        router.push("/dashboard");
+      } else {
+        // Use a promise to ensure we wait before generating feedback
+        new Promise(resolve => setTimeout(resolve, 1500))
+          .then(handleGenerateFeedback)
+          .catch(error => {
+            console.error("Feedback timeout error:", error);
+            setFeedbackError("Feedback generation timed out");
+          });
+      }
     }
-  }, [messages, callStatus, feedbackId, interviewId, router, type, userId]);
+  }, [callStatus, router, type, interviewId, userId, feedbackId]);
 
+  // FIXED: Improved call start with better logging
   const handleCall = async () => {
+    console.log("Starting call...");
     setCallStatus(CallStatus.CONNECTING);
     try {
       if (type === "generate") {
+        console.log("Starting workflow with ID:", process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID);
         await vapi.start(
           undefined,
           undefined,
@@ -115,7 +181,7 @@ export default function Agent({
           process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID!,
           {
             variableValues: {
-              username: userName ?? "Guest",
+              username: userName,
               userid: userId ?? "anonymous",
             },
           }
@@ -125,6 +191,7 @@ export default function Agent({
         if (questions) {
           formattedQuestions = questions.map(q => `- ${q}`).join("\n");
         }
+        console.log("Starting assistant with questions:", formattedQuestions);
         await vapi.start(interviewerAssistant, {
           variableValues: { questions: formattedQuestions },
         });
@@ -135,8 +202,11 @@ export default function Agent({
     }
   };
 
+  // FIXED: Improved disconnect with immediate status update
   const handleDisconnect = () => {
+    console.log("Disconnecting call...");
     vapi.stop();
+    // Immediately set status to FINISHED
     setCallStatus(CallStatus.FINISHED);
   };
 
@@ -197,6 +267,15 @@ export default function Agent({
         <div className="flex w-full justify-center px-4">
           <div className="w-full sm:max-w-md px-6 py-2 bg-teal-200/80 backdrop-blur-sm border-2 border-teal-500 rounded-xl shadow-lg text-center text-lg font-medium text-teal-900">
             {latestMessage}
+          </div>
+        </div>
+      )}
+
+      {/* Added error display */}
+      {feedbackError && (
+        <div className="flex w-full justify-center px-4 mt-4">
+          <div className="w-full sm:max-w-md px-6 py-2 bg-red-100 border-2 border-red-500 rounded-xl text-center text-red-700">
+            Error: {feedbackError}
           </div>
         </div>
       )}

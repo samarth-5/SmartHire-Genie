@@ -1,7 +1,7 @@
-import { db } from "@/firebase/config";           // your Firestore instance
+import { db } from "@/firebase/config";         
 import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
-import { collection, doc, getDoc, setDoc } from "firebase/firestore"; // modular helpers
+import { collection, doc, getDoc, setDoc } from "firebase/firestore"; 
 import z from "zod";
 
 export async function getInterviewById(id: string): Promise<InterviewCardProps | null> 
@@ -15,17 +15,20 @@ export async function createFeedback(params: CreateFeedbackParams) {
   const { interviewId, userId, transcript, feedbackId } = params;
 
   try {
+    // Validate API key
+    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+      throw new Error("Google API key is missing from environment variables");
+    }
+
+    // Correct configuration - no baseUrl needed
+    const model = google("gemini-1.5-flash");
+
     const formattedTranscript = transcript
-      .map(
-        (sentence: { role: string; content: string }) =>
-          `- ${sentence.role}: ${sentence.content}\n`
-      )
+      .map((sentence) => `- ${sentence.role}: ${sentence.content}\n`)
       .join("");
 
     const { object } = await generateObject({
-      model: google("gemini-2.0-flash-001", {
-        structuredOutputs: false,
-      }),
+      model,
       schema: feedbackSchema,
       prompt: `
         You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
@@ -44,8 +47,8 @@ export async function createFeedback(params: CreateFeedbackParams) {
     });
 
     const feedback = {
-      interviewId: interviewId,
-      userId: userId,
+      interviewId,
+      userId,
       totalScore: object.totalScore,
       categoryScores: object.categoryScores,
       strengths: object.strengths,
@@ -67,11 +70,13 @@ export async function createFeedback(params: CreateFeedbackParams) {
     return { success: true, feedbackId: feedbackRef.id };
   } catch (error) {
     console.error("Error saving feedback:", error);
-    return { success: false };
+    return { 
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error"
+    };
   }
 }
 
-// ... keep your feedbackSchema ...
 export const feedbackSchema = z.object({
   totalScore: z.number(),
   categoryScores: z.tuple([

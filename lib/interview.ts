@@ -4,109 +4,90 @@ import { generateObject } from "ai";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore"; 
 import z from "zod";
 
-export async function getInterviewById(id: string): Promise<InterviewCardProps | null> 
-{
-  const interviewRef = doc(db, "interviews", id);
-  const snap = await getDoc(interviewRef);
-  return snap.exists() ? (snap.data() as InterviewCardProps) : null;
+// Fixed: Use z.array(), not z.tuple()
+export const feedbackSchema = z.object({
+  totalScore: z.number(),
+  categoryScores: z.array(
+    z.object({
+      name: z.string(), // validation will be enforced in prompt & client logic, not Zod
+      score: z.number(),
+      comment: z.string(),
+    })
+  ),
+  strengths: z.array(z.string()),
+  areasForImprovement: z.array(z.string()),
+  finalAssessment: z.string(),
+});
+
+export async function getInterviewById(id: string): Promise<InterviewCardProps | null> {
+  try {
+    const interviewRef = doc(db, "interviews", id);
+    const snap = await getDoc(interviewRef);
+    return snap.exists() ? (snap.data() as InterviewCardProps) : null;
+  } catch (error) {
+    console.error("Error fetching interview:", error);
+    return null;
+  }
 }
 
 export async function createFeedback(params: CreateFeedbackParams) {
   const { interviewId, userId, transcript, feedbackId } = params;
 
+  if (!interviewId || !userId) {
+    console.error("Missing required parameters:", { interviewId, userId });
+    return { 
+      success: false, 
+      error: "Missing interviewId or userId" 
+    };
+  }
+
+  if (!transcript || !Array.isArray(transcript) || transcript.length === 0) {
+    console.error("Invalid or empty transcript:", transcript);
+    return { 
+      success: false, 
+      error: "Invalid or empty transcript" 
+    };
+  }
+
   try {
-    // Validate API key
-    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-      throw new Error("Google API key is missing from environment variables");
-    }
-
-    // Correct configuration - no baseUrl needed
-    const model = google("gemini-1.5-flash");
-
-    const formattedTranscript = transcript
-      .map((sentence) => `- ${sentence.role}: ${sentence.content}\n`)
-      .join("");
-
-    const { object } = await generateObject({
-      model,
-      schema: feedbackSchema,
-      prompt: `
-        You are an AI interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories. Be thorough and detailed in your analysis. Don't be lenient with the candidate. If there are mistakes or areas for improvement, point them out.
-        Transcript:
-        ${formattedTranscript}
-
-        Please score the candidate from 0 to 100 in the following areas. Do not add categories other than the ones provided:
-        - **Communication Skills**: Clarity, articulation, structured responses.
-        - **Technical Knowledge**: Understanding of key concepts for the role.
-        - **Problem-Solving**: Ability to analyze problems and propose solutions.
-        - **Cultural & Role Fit**: Alignment with company values and job role.
-        - **Confidence & Clarity**: Confidence in responses, engagement, and clarity.
-        `,
-      system:
-        "You are a professional interviewer analyzing a mock interview. Your task is to evaluate the candidate based on structured categories",
+    const response = await fetch('/api/feedback', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        interviewId,
+        userId,
+        transcript,
+        feedbackId
+      }),
     });
 
-    const feedback = {
-      interviewId,
-      userId,
-      totalScore: object.totalScore,
-      categoryScores: object.categoryScores,
-      strengths: object.strengths,
-      areasForImprovement: object.areasForImprovement,
-      finalAssessment: object.finalAssessment,
-      createdAt: new Date().toISOString(),
-    };
+    const responseText = await response.text();
 
-    let feedbackRef;
-
-    if (feedbackId) {
-      feedbackRef = doc(db, "feedback", feedbackId);
-    } else {
-      feedbackRef = doc(collection(db, "feedback"));
+    if (!response.ok) {
+      return { 
+        success: false, 
+        error: `API request failed with status ${response.status}: ${responseText}` 
+      };
     }
 
-    await setDoc(feedbackRef, feedback);
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch (parseError) {
+      return { 
+        success: false, 
+        error: "Invalid JSON response from API" 
+      };
+    }
+    return result;
 
-    return { success: true, feedbackId: feedbackRef.id };
   } catch (error) {
-    console.error("Error saving feedback:", error);
     return { 
       success: false,
-      error: error instanceof Error ? error.message : "Unknown error"
+      error: error instanceof Error ? error.message : "Network error",
+      details: error instanceof Error ? error.stack : String(error)
     };
   }
 }
-
-export const feedbackSchema = z.object({
-  totalScore: z.number(),
-  categoryScores: z.tuple([
-    z.object({
-      name: z.literal("Communication Skills"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Technical Knowledge"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Problem Solving"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Cultural Fit"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-    z.object({
-      name: z.literal("Confidence and Clarity"),
-      score: z.number(),
-      comment: z.string(),
-    }),
-  ]),
-  strengths: z.array(z.string()),
-  areasForImprovement: z.array(z.string()),
-  finalAssessment: z.string(),
-});

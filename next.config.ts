@@ -1,6 +1,10 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+
+  env: {
+    GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+  },
   // v15‑plus – opt specific Node‑only deps out of RSC bundling
   serverExternalPackages: ['pdf-parse', 'pdfjs-dist'],
 

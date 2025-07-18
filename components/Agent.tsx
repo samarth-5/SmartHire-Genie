@@ -23,13 +23,22 @@ interface SavedMessage {
   content: string;
 }
 
+interface AgentProps {
+  userName: string;
+  userId: string;
+  interviewId: string;
+  feedbackId?: string;
+  type: "interview" | "generate";
+  questions?: string[];
+}
+
 export default function Agent({
   userName,
   userId,
   interviewId,
   feedbackId,
   type,
-  questions,
+  questions = [],
 }: AgentProps) {
   const router = useRouter();
   const user = useCurrentUser();
@@ -37,42 +46,30 @@ export default function Agent({
   const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [microphoneAllowed, setMicrophoneAllowed] = useState(false);
-  const [feedbackError, setFeedbackError] = useState<string | null>(null); // Added error state
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  const [feedbackProcessing, setFeedbackProcessing] = useState(false);
   const messagesRef = useRef<SavedMessage[]>([]);
 
   useEffect(() => {
     const onCallStart = () => {
-      console.log("Call started");
       setCallStatus(CallStatus.ACTIVE);
       setMicrophoneAllowed(true);
     };
-
-    const onCallEnd = () => {
-      console.log("Call ended");
-      setCallStatus(CallStatus.FINISHED);
-    };
-
-    const onSpeechStart = () => {
-      console.log("Speech started");
-      setIsSpeaking(true);
-    };
-
-    const onSpeechEnd = () => {
-      console.log("Speech ended");
-      setIsSpeaking(false);
-    };
-
+    const onCallEnd = () => setCallStatus(CallStatus.FINISHED);
+    const onSpeechStart = () => setIsSpeaking(true);
+    const onSpeechEnd = () => setIsSpeaking(false);
     const onMessage = (msg: any) => {
       if (msg.type === "transcript" && msg.transcriptType === "final") {
-        console.log("New message:", msg);
         const newMessage = { role: msg.role, content: msg.transcript };
         messagesRef.current = [...messagesRef.current, newMessage];
         setMessages(prev => [...prev, newMessage]);
       }
     };
-
-    const onError = (err: unknown) => console.error("Vapi Error:", err);
-    const onStartFailed = (e: unknown) => console.error("call-start-failed ⇒", e);
+    const onError = (err: unknown) => setFeedbackError("Call error: " + String(err));
+    const onStartFailed = (e: unknown) => {
+      setCallStatus(CallStatus.INACTIVE);
+      setFeedbackError("Failed to start call");
+    };
 
     vapi.on("call-start", onCallStart);
     vapi.on("call-end", onCallEnd);
@@ -93,33 +90,20 @@ export default function Agent({
     };
   }, []);
 
-  // FIXED: Improved feedback generation with better error handling
   useEffect(() => {
     const handleGenerateFeedback = async () => {
+      if (feedbackProcessing) return;
       if (!interviewId || !userId) {
-        console.error("Missing required parameters");
-        router.push("/dashboard");
+        setFeedbackError("Missing interview or user information");
         return;
       }
-
       const messagesToUse = messagesRef.current;
-      console.log("Generating feedback with messages:", messagesToUse);
-
-      if (!messagesToUse.length) {
-        console.log("No messages to generate feedback from");
+      if (!messagesToUse || messagesToUse.length === 0) {
         setFeedbackError("No conversation recorded - cannot generate feedback");
-        router.push("/dashboard");
         return;
       }
-
+      setFeedbackProcessing(true);
       try {
-        console.log("Creating feedback with params:", {
-          interviewId,
-          userId,
-          transcript: messagesToUse,
-          feedbackId
-        });
-
         const result = await createFeedback({
           interviewId,
           userId,
@@ -127,53 +111,43 @@ export default function Agent({
           feedbackId,
         });
 
-        console.log("Feedback creation result:", result);
-
         if (result.success) {
-          if (result.feedbackId && interviewId) {
-            console.log("Feedback created successfully, updating interview");
+          if (interviewId) {
             const interviewRef = doc(db, "interviews", interviewId);
-            await updateDoc(interviewRef, { taken: true });
-          } else {
-            console.error("Feedback creation returned no ID");
-            setFeedbackError("Feedback created but no ID returned");
+            await updateDoc(interviewRef, { 
+              taken: true,
+              finalized: true,
+              completedAt: new Date().toISOString()
+            });
           }
+          console.log("=== GENERATED FEEDBACK ===");
+          console.log(JSON.stringify(result.feedback, null, 2));
+          router.push("/dashboard");
         } else {
-          const errorMsg = result.error || "Feedback creation failed";
-          console.error("Feedback creation failed:", errorMsg);
-          setFeedbackError(errorMsg);
+          setFeedbackError(result.error ?? "Feedback creation failed");
         }
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        console.error("Error in feedback generation:", errorMsg);
-        setFeedbackError(errorMsg);
+        setFeedbackError("Unexpected error: " + (error instanceof Error ? error.message : String(error)));
       } finally {
-        router.push("/dashboard");
+        setFeedbackProcessing(false);
       }
     };
 
-    if (callStatus === CallStatus.FINISHED) {
+    if (callStatus === CallStatus.FINISHED && !feedbackProcessing) {
       if (type === "generate") {
         router.push("/dashboard");
       } else {
-        // Use a promise to ensure we wait before generating feedback
-        new Promise(resolve => setTimeout(resolve, 1500))
-          .then(handleGenerateFeedback)
-          .catch(error => {
-            console.error("Feedback timeout error:", error);
-            setFeedbackError("Feedback generation timed out");
-          });
+        setTimeout(handleGenerateFeedback, 1500);
       }
     }
-  }, [callStatus, router, type, interviewId, userId, feedbackId]);
+    // eslint-disable-next-line
+  }, [callStatus, router, type, interviewId, userId, feedbackId, feedbackProcessing]);
 
-  // FIXED: Improved call start with better logging
   const handleCall = async () => {
-    console.log("Starting call...");
     setCallStatus(CallStatus.CONNECTING);
+    setFeedbackError(null);
     try {
       if (type === "generate") {
-        console.log("Starting workflow with ID:", process.env.NEXT_PUBLIC_VAPI_WORKFLOW_ID);
         await vapi.start(
           undefined,
           undefined,
@@ -187,31 +161,23 @@ export default function Agent({
           }
         );
       } else {
-        let formattedQuestions = "";
-        if (questions) {
-          formattedQuestions = questions.map(q => `- ${q}`).join("\n");
-        }
-        console.log("Starting assistant with questions:", formattedQuestions);
+        let formattedQuestions = questions.map(q => `- ${q}`).join("\n");
         await vapi.start(interviewerAssistant, {
           variableValues: { questions: formattedQuestions },
         });
       }
     } catch (err) {
-      console.error("Failed to start Vapi:", err);
       setCallStatus(CallStatus.INACTIVE);
+      setFeedbackError("Failed to start call");
     }
   };
 
-  // FIXED: Improved disconnect with immediate status update
   const handleDisconnect = () => {
-    console.log("Disconnecting call...");
     vapi.stop();
-    // Immediately set status to FINISHED
     setCallStatus(CallStatus.FINISHED);
   };
 
   const latestMessage = messages[messages.length - 1]?.content;
-
   const fallbackSvg = useMemo(() => {
     const svg = `
       <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200" fill="none">
@@ -223,7 +189,6 @@ export default function Agent({
       </svg>`;
     return `data:image/svg+xml,${encodeURIComponent(svg)}`;
   }, []);
-
   const photoSrc = user?.photoURL || fallbackSvg;
 
   return (
@@ -271,11 +236,18 @@ export default function Agent({
         </div>
       )}
 
-      {/* Added error display */}
       {feedbackError && (
         <div className="flex w-full justify-center px-4 mt-4">
           <div className="w-full sm:max-w-md px-6 py-2 bg-red-100 border-2 border-red-500 rounded-xl text-center text-red-700">
             Error: {feedbackError}
+          </div>
+        </div>
+      )}
+
+      {feedbackProcessing && (
+        <div className="flex w-full justify-center px-4 mt-4">
+          <div className="w-full sm:max-w-md px-6 py-2 bg-blue-100 border-2 border-blue-500 rounded-xl text-center text-blue-700">
+            Generating feedback...
           </div>
         </div>
       )}
@@ -286,7 +258,7 @@ export default function Agent({
             onClick={handleCall}
             type="button"
             aria-label={callStatus === CallStatus.INACTIVE || callStatus === CallStatus.FINISHED ? "Start Call" : "Connecting"}
-            disabled={callStatus === CallStatus.CONNECTING}
+            disabled={callStatus === CallStatus.CONNECTING || feedbackProcessing}
             className={cn(
               "relative px-6 py-3 rounded-full bg-teal-400 text-white font-semibold",
               "flex items-center justify-center gap-2",

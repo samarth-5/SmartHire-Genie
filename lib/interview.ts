@@ -19,6 +19,21 @@ export const feedbackSchema = z.object({
   finalAssessment: z.string(),
 });
 
+export default async function getFeedbackById(id: string) {
+  try {
+    const docRef = doc(db, 'feedback', id);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      return docSnap.data();
+    } else {
+      return null;
+    }
+  } catch (error) {
+    throw new Error(`Error fetching feedback: ${error}`);
+  }
+}
+
 export async function getInterviewById(id: string): Promise<InterviewCardProps | null> {
   try {
     const interviewRef = doc(db, "interviews", id);

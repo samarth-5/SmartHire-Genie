@@ -61,7 +61,7 @@ Evaluate the candidate on these EXACT categories (all five must appear in your r
 
 For each, include:
 - name (as above)
-- score (0-10)
+- score (0-100)
 - comment
 
 Also, give:

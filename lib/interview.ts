@@ -1,6 +1,5 @@
 import { db } from "@/firebase/config";         
-import { google } from "@ai-sdk/google";
-import { generateObject } from "ai";
+import { CreateFeedbackParams, InterviewCardProps } from "@/types";
 import { collection, doc, getDoc, setDoc } from "firebase/firestore"; 
 import z from "zod";
 

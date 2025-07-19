@@ -140,7 +140,6 @@ export default function Agent({
         setTimeout(handleGenerateFeedback, 1500);
       }
     }
-    // eslint-disable-next-line
   }, [callStatus, router, type, interviewId, userId, feedbackId, feedbackProcessing]);
 
   const handleCall = async () => {

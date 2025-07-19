@@ -86,9 +86,8 @@ Output all category scores as an array of 5 objects. Names must exactly match ab
       createdAt: new Date().toISOString(),
     };
 
-    let feedbackRef = feedbackId
-      ? doc(db, "feedback", feedbackId)
-      : doc(collection(db, "feedback"));
+    const feedbackRef = doc(db, "feedback", interviewId);
+    await setDoc(feedbackRef, feedback);
 
     await setDoc(feedbackRef, feedback);
 

@@ -1,6 +1,6 @@
 import { generateText } from "ai";
 import { google } from "@ai-sdk/google";
-import meta from "@/public/logos/meta.svg"
+import amazon from "@/public/logos/amazon.svg"
 import { db } from "@/firebase/config";
 import { addDoc, collection } from "firebase/firestore";
 //import { getRandomInterviewCover } from "@/lib/utils";
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
         questions: JSON.parse(questions),
         userId: userid,
         finalized: true,
-        coverImage: meta,
+        coverImage: amazon,
         createdAt: new Date().toISOString(),
         taken: false
       };

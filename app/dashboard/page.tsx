@@ -14,6 +14,7 @@ import {
   DocumentData,
 } from "firebase/firestore";
 import Footer from "@/components/Footer";
+import { InterviewCardProps } from "@/types";
 
 type Interview = Omit<InterviewCardProps, "coverImage"> & {
   id: string;

@@ -7,6 +7,7 @@
    import Agent from '@/components/Agent';
    import useCurrentUser from '@/firebase/currentUser';
    import { getInterviewById } from '@/lib/interview';
+import { AuthGuard } from '@/firebase/AuthGuard';
    
    export default function InterviewPage({ params }: RouteParams) {
      const { id } = React.use(params);          // ✅ no warning
@@ -38,6 +39,7 @@
      }
    
      return (
+      <AuthGuard>
        <div className="min-h-screen flex flex-col bg-teal-100 pt-16 lg:pt-17">
          <header className="relative isolate overflow-hidden bg-teal-200 shadow">
            {interview.coverImage?.src && (
@@ -72,6 +74,7 @@
            </div>
          </main>
        </div>
+       </AuthGuard>
      );
    }
    

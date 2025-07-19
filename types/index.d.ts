@@ -82,6 +82,7 @@ interface InterviewCardProps {
   company: string;
   role: string;
   type: string;
+  level: string;
   techstack: string[];
   coverImage?: {
     src: string;

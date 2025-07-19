@@ -35,14 +35,14 @@ export default function FeedbackPage() {
 
   return (
     <div className="min-h-screen bg-teal-100 py-6 px-2 sm:px-4 mt-16">
-      <div className="max-w-4xl mx-auto bg-white/90 shadow-xl rounded-2xl flex flex-col sm:flex-row items-center gap-4 sm:gap-8 p-4 sm:p-8 mb-4">
+      <div className="max-w-4xl mx-auto bg-teal-200 shadow-xl rounded-2xl flex flex-col sm:flex-row items-center gap-4 sm:gap-8 p-4 sm:p-8 mb-4">
         <div className="shrink-0 flex justify-center w-full sm:w-auto">
           <Image
             src={interview.coverImage?.src || "/placeholder.svg"}
             alt={`${interview.company} Logo`}
             width={100}
             height={100}
-            className="rounded-lg bg-white shadow border border-teal-100 object-contain"
+            className="rounded-lg bg-teal-200 shadow border border-black object-contain"
           />
         </div>
 
@@ -56,7 +56,7 @@ export default function FeedbackPage() {
                 {interview.level}
               </span>
             )}
-            <span className="bg-teal-50 text-teal-900 font-semibold px-3 py-1 rounded-full border border-teal-300 text-sm sm:text-base">
+            <span className="bg-teal-100 text-teal-900 font-semibold px-3 py-1 rounded-full border border-teal-300 text-sm sm:text-base">
               {interview.type}
             </span>
           </div>
@@ -65,7 +65,7 @@ export default function FeedbackPage() {
               {interview.techstack.map((t, i) => (
                 <span
                   key={i}
-                  className="inline-block bg-teal-200 text-teal-800 px-2 py-0.5 rounded text-xs sm:text-sm font-medium"
+                  className="inline-block bg-teal-100 text-teal-800 px-2 py-0.5 rounded text-xs sm:text-sm font-medium"
                 >
                   {t}
                 </span>
@@ -78,7 +78,7 @@ export default function FeedbackPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto bg-white/95 shadow rounded-2xl p-4 sm:p-8 text-base sm:text-lg">
+      <div className="max-w-4xl mx-auto bg-teal-200/95 shadow rounded-2xl p-4 sm:p-8 text-base sm:text-lg">
         <h2 className="text-lg sm:text-2xl font-bold text-teal-800 mb-4">
           Overall Score:{" "}
           <span className="font-extrabold text-teal-900">
@@ -133,7 +133,7 @@ export default function FeedbackPage() {
           <h3 className="text-base sm:text-xl font-semibold text-teal-800 mb-2">
             Final Assessment
           </h3>
-          <p className="text-teal-700 whitespace-pre-line">
+          <p className="text-teal-700 teal-200space-pre-line">
             {feedback.finalAssessment}
           </p>
         </section>

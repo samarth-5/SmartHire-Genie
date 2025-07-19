@@ -71,7 +71,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 bg-teal-200/80 backdrop-blur-md shadow-sm">
+      <header className="fixed top-0 left-0 w-full z-50 bg-teal-200 backdrop-blur-md shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between text-black">
           <Link
             href="/"

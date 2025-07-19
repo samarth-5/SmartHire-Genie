@@ -29,7 +29,7 @@ export default function InterviewCard({
            </span>
    
            <div className="flex items-start gap-4 mb-4">
-             <div className="relative h-20 w-20 min-w-[5rem] rounded-lg overflow-hidden bg-teal-50">
+             <div className="relative h-20 w-20 min-w-[5rem] rounded-lg overflow-hidden bg-teal-100/70">
                <Image
                  src={coverImage?.src || "/placeholder.png"}
                  alt={`${company} logo`}

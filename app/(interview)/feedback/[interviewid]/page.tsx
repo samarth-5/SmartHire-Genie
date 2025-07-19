@@ -45,7 +45,7 @@ export default function FeedbackPage() {
             alt={`${interview.company} Logo`}
             width={100}
             height={100}
-            className="rounded-lg bg-teal-200 shadow border border-black object-contain"
+            className="rounded-lg bg-teal-200 shadow object-contain"
           />
         </div>
 

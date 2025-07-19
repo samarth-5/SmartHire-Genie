@@ -1,5 +1,6 @@
 "use client";
 
+import Footer from "@/components/Footer";
 import { AuthGuard } from "@/firebase/AuthGuard";
 import Link from "next/link";
 import { useState } from "react";
@@ -213,14 +214,7 @@ export default function ResumePage() {
         </div>
       </div>
 
-      <footer className="bg-teal-100 pb-3 text-center">
-        <Link
-          href="/about"
-          className="text-sm font-bold text-black transition hover:text-black/80 hover:underline"
-        >
-          © 2025&nbsp;Developed&nbsp;by&nbsp;@Samarth.&nbsp;All&nbsp;rights&nbsp;reserved.
-        </Link>
-      </footer>
+      <Footer />
     </AuthGuard>
   );
 }

@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Feedback, InterviewCardProps } from "@/types";
+import { AuthGuard } from "@/firebase/AuthGuard";
+import Footer from "@/components/Footer";
 
 export default function FeedbackPage() {
   const { interviewid } = useParams();
@@ -34,6 +36,7 @@ export default function FeedbackPage() {
     );
 
   return (
+    <AuthGuard>
     <div className="min-h-screen bg-teal-100 py-6 px-2 sm:px-4 mt-16">
       <div className="max-w-4xl mx-auto bg-teal-200 shadow-xl rounded-2xl flex flex-col sm:flex-row items-center gap-4 sm:gap-8 p-4 sm:p-8 mb-4">
         <div className="shrink-0 flex justify-center w-full sm:w-auto">
@@ -139,5 +142,7 @@ export default function FeedbackPage() {
         </section>
       </div>
     </div>
+    <Footer />
+    </AuthGuard>
   );
 }

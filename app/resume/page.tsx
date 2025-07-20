@@ -2,7 +2,6 @@
 
 import Footer from "@/components/Footer";
 import { AuthGuard } from "@/firebase/AuthGuard";
-import Link from "next/link";
 import { useState } from "react";
 import toast from "react-hot-toast";
 

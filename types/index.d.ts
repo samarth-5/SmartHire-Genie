@@ -93,4 +93,5 @@ interface InterviewCardProps {
     blurWidth?: number;
   };
   taken: boolean
+  questions?: string[];
 }

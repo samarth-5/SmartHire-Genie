@@ -8,9 +8,10 @@
    import useCurrentUser from '@/firebase/currentUser';
    import { getInterviewById } from '@/lib/interview';
 import { AuthGuard } from '@/firebase/AuthGuard';
+import { InterviewCardProps, RouteParams } from '@/types';
    
    export default function InterviewPage({ params }: RouteParams) {
-     const { id } = React.use(params);          // ✅ no warning
+     const { id } = React.use(params);         
    
      const router = useRouter();
    

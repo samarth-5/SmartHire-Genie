@@ -9,7 +9,8 @@
    import { getInterviewById } from '@/lib/interview';
 import { AuthGuard } from '@/firebase/AuthGuard';
 import { InterviewCardProps, RouteParams } from '@/types';
-   
+import google    from "@/public/logos/google.svg";
+
    export default function InterviewPage({ params }: RouteParams) {
      const { id } = React.use(params);         
    
@@ -42,18 +43,16 @@ import { InterviewCardProps, RouteParams } from '@/types';
      return (
       <AuthGuard>
        <div className="min-h-screen flex flex-col bg-teal-100 pt-16 lg:pt-17">
-         <header className="relative isolate overflow-hidden bg-teal-200 shadow">
+         <header className="bg-teal-300/70 flex items-center gap-5 px-4 py-8 justify-center"> 
            {interview.coverImage?.src && (
              <Image
-               src={interview.coverImage.src}
+               src={interview.coverImage?.src}
                alt={`${interview.company} cover`}
-               fill
-               priority
-               className="object-cover opacity-20"
+               height={70}
+               width={70}
              />
            )}
-           <div className="absolute inset-0 bg-teal-300/30 backdrop-blur-sm" />
-           <div className="relative z-10 mx-auto max-w-5xl px-4 py-8 text-center">
+           <div className="relative z-10 text-center">
              <h1 className="text-4xl md:text-5xl font-extrabold text-teal-900">
                {interview.company}
              </h1>

@@ -43,10 +43,10 @@ export default function Navbar() {
         const code = (err as FirebaseAuthError)?.code;
         if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
           toast.error('Sign-in cancelled by user!');
-          console.info('Sign-in cancelled by user.');
+          //console.info('Sign-in cancelled by user.');
         } else {
           toast.error('Login failed!');
-          console.error('Login failed!', err);
+          //console.error('Login failed!', err);
         }
       } finally {
         setLoading(false);

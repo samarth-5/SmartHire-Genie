@@ -57,7 +57,7 @@ Do NOT wrap in markdown.
 
     return NextResponse.json({ feedback });
   } catch (err) {
-    console.error('analyze‑resume error:', err);
+    //console.error('analyze‑resume error:', err);
     return NextResponse.json({ error: 'Resume analysis failed. Please try again.' }, { status: 500 });
   }
 }

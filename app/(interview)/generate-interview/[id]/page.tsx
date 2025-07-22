@@ -1,46 +1,43 @@
-   'use client';
+'use client';
 
-   import React, { useEffect, useState } from 'react';
-   import Image from 'next/image';
-   import { useRouter } from 'next/navigation';
-   
-   import Agent from '@/components/Agent';
-   import useCurrentUser from '@/firebase/currentUser';
-   import { getInterviewById } from '@/lib/interview';
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import Agent from '@/components/Agent';
+import useCurrentUser from '@/firebase/currentUser';
+import { getInterviewById } from '@/lib/interview';
 import { AuthGuard } from '@/firebase/AuthGuard';
 import { InterviewCardProps, RouteParams } from '@/types';
-import google    from "@/public/logos/google.svg";
 
-   export default function InterviewPage({ params }: RouteParams) {
-     const { id } = React.use(params);         
-   
-     const router = useRouter();
-   
-     const user = useCurrentUser();
-   
-     const [interview, setInterview] = useState<InterviewCardProps | null>(null);
-   
-     useEffect(() => {
-       (async () => {
-         if (!id) return;
-         const data = await getInterviewById(id);
-         if (!data) 
-          router.replace('/dashboard'); 
-         else setInterview(data as InterviewCardProps);
-       })();
-     }, [id, router]);
+export default function InterviewPage({ params }: RouteParams) {
+  const { id } = React.use(params);         
 
-     console.log(interview);
+  const router = useRouter();
    
-     if (user === null || !interview) {
-       return (
-         <div className="min-h-screen grid place-items-center bg-teal-100">
-           Loading…
-         </div>
-       );
-     }
+  const user = useCurrentUser();
    
-     return (
+  const [interview, setInterview] = useState<InterviewCardProps | null>(null);
+   
+  useEffect(() => {
+    (async () => {
+     if (!id) return;       const data = await getInterviewById(id);
+      if (!data) 
+       router.replace('/dashboard'); 
+      else setInterview(data as InterviewCardProps);
+   })();
+ }, [id, router]);
+
+//console.log(interview);
+   
+    if (user === null || !interview) {
+      return (
+        <div className="min-h-screen grid place-items-center bg-teal-100">
+         Loading…
+        </div>
+      );
+    }
+   
+    return (
       <AuthGuard>
        <div className="min-h-screen flex flex-col bg-teal-100 pt-16 lg:pt-17">
          <header className="bg-teal-300/70 flex items-center gap-5 px-4 py-8 justify-center"> 

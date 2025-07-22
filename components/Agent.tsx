@@ -120,8 +120,8 @@ export default function Agent({
               completedAt: new Date().toISOString()
             });
           }
-          console.log("=== GENERATED FEEDBACK ===");
-          console.log(JSON.stringify(result.feedback, null, 2));
+          //console.log("=== GENERATED FEEDBACK ===");
+          //console.log(JSON.stringify(result.feedback, null, 2));
           router.push("/dashboard");
         } else {
           setFeedbackError(result.error ?? "Feedback creation failed");

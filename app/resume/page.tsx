@@ -30,7 +30,7 @@ export default function ResumePage() {
     try {
       return JSON.parse(cleaned) as FeedbackData;
     } catch (error) {
-      console.error("Unable to parse feedback JSON", error);
+      //console.error("Unable to parse feedback JSON", error);
       toast.error("Received invalid feedback format from the server.");
       return null;
     }

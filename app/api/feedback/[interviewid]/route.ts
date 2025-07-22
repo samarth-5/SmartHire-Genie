@@ -3,9 +3,9 @@ import { db } from "@/firebase/config";
 import { doc, getDoc } from "firebase/firestore";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { interviewid: string } }
-) {
+    req: NextRequest,
+    { params }: { params: { interviewid: string } }
+  ) {
   const { interviewid } = params;
 
   if (!interviewid) {

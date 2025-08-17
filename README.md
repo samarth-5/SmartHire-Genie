@@ -1,3 +1,6 @@
+<img width="3361" height="3842" alt="SmartHireGenie" src="https://github.com/user-attachments/assets/0bb90317-3590-4cdc-89f5-20c79a06e296" />
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

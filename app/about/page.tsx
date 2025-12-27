@@ -73,7 +73,7 @@ export default function AboutPage() {
               svg={<LeetCodeSVG />}
             />
             <IconLink
-              href="https://samarth-dev.onrender.com"
+              href="https://samarth-fsdev.vercel.app"
               label="Portfolio"
               bg="bg-purple-600"
               svg={<GlobeSVG />}

@@ -5,7 +5,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 export const runtime = 'nodejs';           
 export const dynamic = 'force-dynamic';
 
-const MODEL = 'gemini-2.5-pro';
+const MODEL = 'gemini-2.5-flash';
 const MAX_CHARS = 20_000;
 
 export async function POST(req: NextRequest) {
@@ -49,7 +49,6 @@ Do NOT wrap in markdown.
     const { response } = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: systemPrompt + userPrompt }] }],
     });
-
     let feedback: unknown = response.text().trim();
     try {
       feedback = JSON.parse(feedback as string);
@@ -57,7 +56,7 @@ Do NOT wrap in markdown.
 
     return NextResponse.json({ feedback });
   } catch (err) {
-    //console.error('analyze‑resume error:', err);
+    console.error('analyze‑resume error:', err);
     return NextResponse.json({ error: 'Resume analysis failed. Please try again.' }, { status: 500 });
   }
 }

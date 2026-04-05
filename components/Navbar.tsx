@@ -33,25 +33,9 @@ export default function Navbar() {
       message?: string;
     };
     
-    const handleLogin = async () => {
-      if (loading) return;
-      setLoading(true);
-    
-      try {
-        await signInWithGoogle();
-      } catch (err: unknown) {
-        const code = (err as FirebaseAuthError)?.code;
-        if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-          toast.error('Sign-in cancelled by user!');
-          //console.info('Sign-in cancelled by user.');
-        } else {
-          toast.error('Login failed!');
-          //console.error('Login failed!', err);
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleLogin = () => {
+    toast.error('Access restricted. Please take access from Developer.');
+  };
     
   const handleLogout = async () => {
     try {
